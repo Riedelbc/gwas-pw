@@ -479,7 +479,7 @@ void SNPs_PW::load_snps_pw(string infile, vector<string> annot, vector<string> d
             dists.push_back( atoi(line[*it].c_str()));
         }
 
-        SNP_PW s(rs, chr , pos, Z1, Z2, V1, V2, an, dists, dmodels, params->V, params->cor, infile);
+        SNP_PW s(rs, chr , pos, Z1, Z2, V1, V2, an, dists, dmodels, params->V, params->cor, infile.c_str());
         if (params->finemap || params->numberedseg){
             int snumber = atoi(line[segnumberindex].c_str());
             s.chunknumber = snumber;
