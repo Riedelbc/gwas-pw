@@ -872,7 +872,7 @@ void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){
                 //cout << start << " "<< j << " adding\n";
                 // If the current segment does not contain many SNPS remove it.
                 //
-                if ((j - start) < p.min_window_size){
+                if ((j - start) < p->min_window_size){
                     cerr << "Removing window because it does not contain any SNPs." << endl;
                 }else{
                 segments.push_back(make_pair(start, j));
@@ -893,7 +893,7 @@ void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){
 
 
         }
-        if ((j - start) < p.min_window_size){
+        if ((j - start) < p->min_window_size){
             cerr << "Removing window as it does not contain enough SNPS" << endl;
         }else{
         //cout << start << " "<< j << " done adding\n";

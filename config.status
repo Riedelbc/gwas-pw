@@ -363,11 +363,11 @@ Copyright (C) 2008 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/hpc/users/xboocoj01/gwas-pw'
+ac_pwd='/Users/smilefreak/Sinai/claudia/gwas-pw'
 srcdir='.'
-INSTALL='/usr/bin/install -c'
-MKDIR_P='/bin/mkdir -p'
-AWK='gawk'
+INSTALL='/usr/local/bin/ginstall -c'
+MKDIR_P='/usr/local/bin/gmkdir -p'
+AWK='awk'
 test -n "$AWK" || AWK=awk
 # The default lists apply if the user does not specify any file.
 ac_need_defaults=:
@@ -537,8 +537,8 @@ S["am__EXEEXT_FALSE"]=""
 S["am__EXEEXT_TRUE"]="#"
 S["LTLIBOBJS"]=""
 S["LIBOBJS"]=""
-S["BOOST_LDFLAGS"]=""
-S["BOOST_CPPFLAGS"]=""
+S["BOOST_LDFLAGS"]="-L/usr/local/lib"
+S["BOOST_CPPFLAGS"]="-I/usr/local/include"
 S["am__fastdepCC_FALSE"]="#"
 S["am__fastdepCC_TRUE"]=""
 S["CCDEPMODE"]="depmode=gcc3"
@@ -556,20 +556,20 @@ S["am__include"]="include"
 S["DEPDIR"]=".deps"
 S["am__untar"]="tar -xf -"
 S["am__tar"]="tar --format=posix -chf - \"$$tardir\""
-S["AMTAR"]="${SHELL} /hpc/users/xboocoj01/gwas-pw/missing --run tar"
+S["AMTAR"]="${SHELL} /Users/smilefreak/Sinai/claudia/gwas-pw/missing --run tar"
 S["am__leading_dot"]="."
 S["SET_MAKE"]=""
-S["AWK"]="gawk"
-S["mkdir_p"]="/bin/mkdir -p"
-S["MKDIR_P"]="/bin/mkdir -p"
+S["AWK"]="awk"
+S["mkdir_p"]="/usr/local/bin/gmkdir -p"
+S["MKDIR_P"]="/usr/local/bin/gmkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]=""
-S["install_sh"]="${SHELL} /hpc/users/xboocoj01/gwas-pw/install-sh"
-S["MAKEINFO"]="${SHELL} /hpc/users/xboocoj01/gwas-pw/missing --run makeinfo"
-S["AUTOHEADER"]="${SHELL} /hpc/users/xboocoj01/gwas-pw/missing --run autoheader"
-S["AUTOMAKE"]="${SHELL} /hpc/users/xboocoj01/gwas-pw/missing --run automake-1.11"
-S["AUTOCONF"]="${SHELL} /hpc/users/xboocoj01/gwas-pw/missing --run autoconf"
-S["ACLOCAL"]="${SHELL} /hpc/users/xboocoj01/gwas-pw/missing --run aclocal-1.11"
+S["install_sh"]="${SHELL} /Users/smilefreak/Sinai/claudia/gwas-pw/install-sh"
+S["MAKEINFO"]="${SHELL} /Users/smilefreak/Sinai/claudia/gwas-pw/missing --run makeinfo"
+S["AUTOHEADER"]="${SHELL} /Users/smilefreak/Sinai/claudia/gwas-pw/missing --run autoheader"
+S["AUTOMAKE"]="${SHELL} /Users/smilefreak/Sinai/claudia/gwas-pw/missing --run automake-1.11"
+S["AUTOCONF"]="${SHELL} /Users/smilefreak/Sinai/claudia/gwas-pw/missing --run autoconf"
+S["ACLOCAL"]="${SHELL} /Users/smilefreak/Sinai/claudia/gwas-pw/missing --run aclocal-1.11"
 S["VERSION"]="0.02"
 S["PACKAGE"]="gwas-pw"
 S["CYGPATH_W"]="echo"
@@ -580,7 +580,7 @@ S["INSTALL_PROGRAM"]="${INSTALL}"
 S["OBJEXT"]="o"
 S["EXEEXT"]=""
 S["ac_ct_CXX"]="g++"
-S["CPPFLAGS"]=" "
+S["CPPFLAGS"]=" -I/usr/local/include"
 S["LDFLAGS"]=""
 S["CXXFLAGS"]="-g -O2"
 S["CXX"]="g++"
@@ -589,8 +589,8 @@ S["host_alias"]=""
 S["build_alias"]=""
 S["LIBS"]="-lgsl -lgslcblas -lm -lz "
 S["ECHO_T"]=""
-S["ECHO_N"]="-n"
-S["ECHO_C"]=""
+S["ECHO_N"]=""
+S["ECHO_C"]="\\c"
 S["DEFS"]="-DHAVE_CONFIG_H"
 S["mandir"]="${datarootdir}/man"
 S["localedir"]="${datarootdir}/locale"
