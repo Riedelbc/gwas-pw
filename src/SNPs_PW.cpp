@@ -187,7 +187,6 @@ void SNPs_PW::make_segments(string bedfile){
         int intervalindex = 0;
         while (j < chromosome.second){
             int jpos = d[j].pos;
-            cerr << "current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
             if (jpos < currentseg.first){
                 //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here1\n";
                 cerr << "ERROR: current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
@@ -849,12 +848,13 @@ void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){
         while (j < chromosome.second){
             int jpos = d[j].pos;
 
+            cerr << "current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
             if (jpos < currentseg.first){
                 //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here1\n";
                 cerr << "ERROR: current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
                 exit(1);
             }
-            else if (jpos > currentseg.second and j == start){
+            else if (jpos >= currentseg.second and j == start){
                 //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here2\n";
                 intervalindex++;
                 if (intervalindex >= intervals.size()){
@@ -864,7 +864,7 @@ void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){
                 currentseg = intervals[intervalindex];
             }
             else if (jpos >=currentseg.first and jpos < currentseg.second) {
-                //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here3\n";
+                cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here3\n";
                 j = j+1;
             }
             else if (jpos >= currentseg.second and j != start){
