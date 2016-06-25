@@ -67,13 +67,15 @@ public:
 	double cross10(bool);
 	vector<set<int> > make_cross10();
 	double llk_xv(set<int>, bool);
-
+    int last_index;
 	double phi, resphi;
 
 	void print();
 	void print(string, string);
 
 	void make_segments(int);
+	void make_segments2(int,Fgwas_params *);
+	void make_segments3(int,Fgwas_params *, string);
 	void make_chrsegments();
 	void make_segments_finemap();
 	void print_segments();

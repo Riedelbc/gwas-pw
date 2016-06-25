@@ -21,802 +21,930 @@ SNPs_PW::SNPs_PW(Fgwas_params *p){
 	for (vector<string>::iterator it = params->distmodels.begin(); it != params->distmodels.end(); it++) dmodels.push_back( read_dmodel(*it));
 
 	//read input file
-	if (params->pairwise) load_snps_pw(params->infile, params->wannot, params->dannot, params->segannot);
+    last_index  = 0;
+	if (params->pairwise){ 
+        cout << "loading pairwise" << endl;
+        //load_snps_pw(params->infile, params->wannot, params->dannot, params->segannot);
+    }
 	else{
 		cerr<< "ERROR: in pairwise, parameter file says this isn't a pairwise run\n";
 		exit(1);
 	}
-	//make segments
-	if (params->finemap || params->numberedseg) make_segments_finemap();
-	else{
-		make_chrsegments();
-		if (params->bedseg) make_segments(params->segment_bedfile);
-		else make_segments(params->K);
-	}
+    cout << " Make segments" << endl;
+    //make segments
+    if (params->finemap || params->numberedseg) make_segments_finemap();
+    else{
+        //make_chrsegments();
+        if (params->bedseg) {
+           // make_segments(params->segment_bedfile);
+           make_segments3(params->K, params, params->segment_bedfile);
+        }
+        else make_segments2(params->K,params);
+    }
 
-	//double-check input quality
-	check_input();
+    //double-check input quality
+    check_input();
 
 
 
-	//initialize
-	snppri.clear();
-	pi.clear();
-	pi.push_back(1);pi.push_back(1);pi.push_back(1);pi.push_back(1);pi.push_back(1);
-	init_segpriors();
+    //initialize
+    snppri.clear();
+    pi.clear();
+    pi.push_back(1);pi.push_back(1);pi.push_back(1);pi.push_back(1);pi.push_back(1);
+    init_segpriors();
     phi = (1+sqrt(5))/2;
     resphi = 2-phi;
-	for (int i = 0; i < d.size(); i++){
-		vector<double> sp;
-		sp.push_back(1.0);sp.push_back(1.0);sp.push_back(1.0);
-		snppri.push_back(sp);
-		snppost.push_back(1.0);
-	}
+    for (int i = 0; i < d.size(); i++){
+        vector<double> sp;
+        sp.push_back(1.0);sp.push_back(1.0);sp.push_back(1.0);
+        snppri.push_back(sp);
+        snppost.push_back(1.0);
+    }
 
-	nannot = annotnames.size();
-	nsegannot = segannotnames.size();
-	for (int i = 0; i < nannot; i++)	lambdas.push_back(0);
-	for (int i = 0; i < nsegannot; i++) seglambdas.push_back(0);
-	set_priors();
+    vector<string> wannot, dannot, distmodels, segannot;
+    nannot = annotnames.size();
+    nsegannot = segannotnames.size();
+    for (int i = 0; i < nannot; i++)	lambdas.push_back(0);
+    for (int i = 0; i < nsegannot; i++) seglambdas.push_back(0);
+    set_priors();
 }
 
 void SNPs_PW::check_input(){
 
-	double meansize = 0.0;
-	double meannsnp = 0.0;
-	int minnsnp = 1000000000;
-	int maxsnp = 0;
-	int nseg = segments.size();
-	for (vector<pair<int, int> >::iterator it = segments.begin(); it != segments.end(); it++){
+    double meansize = 0.0;
+    double meannsnp = 0.0;
+    int minnsnp = 1000000000;
+    int maxsnp = 0;
+    int nseg = segments.size();
+    for (vector<pair<int, int> >::iterator it = segments.begin(); it != segments.end(); it++){
 
-		int st = it->first;
-		int sp = it->second;
-		int toadd = d[sp-1].pos- d[st].pos;
-		int l = sp-st;
-		if (l < minnsnp) minnsnp = l;
-		if (l > maxsnp) maxsnp = l;
-		meannsnp += (double) l / (double) nseg;
+        int st = it->first;
+        int sp = it->second;
+        int toadd = d[sp-1].pos- d[st].pos;
+        int l = sp-st;
+        if (l < minnsnp) minnsnp = l;
+        if (l > maxsnp) maxsnp = l;
+        meannsnp += (double) l / (double) nseg;
 
-		meansize += ((double) toadd/ 1000000.0) / (double) nseg;
+        meansize += ((double) toadd/ 1000000.0) / (double) nseg;
 
-		int prevpos = d[st].pos;
-		string prevchr = d[st].chr;
-		for (int i= st+1; i < sp; i++){
-			string testchr = d[i].chr;
-			int testpos = d[i].pos;
-			if (testchr == prevchr and prevpos >= testpos){  //test that each segment is only a single chromosome, is ordered
-				cerr<< "ERROR: SNPs out of order\nChromosome "<<testchr << ". Position "<< prevpos << " seen before "<< testpos<< "\n";
-				exit(1);
-			}
-			prevpos = testpos;
-			prevchr = testchr;
-		}
-	}
+        int prevpos = d[st].pos;
+        string prevchr = d[st].chr;
+        for (int i= st+1; i < sp; i++){
+            string testchr = d[i].chr;
+            int testpos = d[i].pos;
+//            if (testchr == prevchr and prevpos >= testpos){  //test that each segment is only a single chromosome, is ordered
+ //               cerr<< "ERROR: SNPs out of order\nChromosome "<<testchr << ". Position "<< prevpos << " seen before "<< testpos<< "\n";
+   //             exit(1);
+    //        }
+            prevpos = testpos;
+            prevchr = testchr;
+        }
+    }
 
-	cout << "Number of segments: "<< segments.size()<< "\nMean segment size: "<< meansize<< " Mb ("<< meannsnp << " SNPs)\n";
-	cout << "Minimum number of SNPs/segment: "<< minnsnp << "\n";
-	cout << "Maximum number of SNPs/segment: "<< maxsnp << "\n";
-	if (meansize > 10.0){
-		cout << "\n****\n**** WARNING: mean segment size is over 10Mb, this often causes convergence problems (in human data). Consider reducing window size (using -k).\n****\n\n"; cout.flush();
-	}
+    cout << "Number of segments: "<< segments.size()<< "\nMean segment size: "<< meansize<< " Mb ("<< meannsnp << " SNPs)\n";
+    cout << "Minimum number of SNPs/segment: "<< minnsnp << "\n";
+    cout << "Maximum number of SNPs/segment: "<< maxsnp << "\n";
+    if (meansize > 10.0){
+        cout << "\n****\n**** WARNING: mean segment size is over 10Mb, this often causes convergence problems (in human data). Consider reducing window size (using -k).\n****\n\n"; cout.flush();
+    }
 }
 
 
 map<string, vector<pair< int, int> > > SNPs_PW::read_bedfile(string bedfile){
-	map<string, vector<pair< int, int> > > toreturn;
-	ifstream in(bedfile.c_str());
-	vector<string> line;
-	struct stat stFileInfo;
-	int intStat;
-	string st, buf;
+    map<string, vector<pair< int, int> > > toreturn;
+    ifstream in(bedfile.c_str());
+    vector<string> line;
+    struct stat stFileInfo;
+    int intStat;
+    string st, buf;
 
-	intStat = stat(bedfile.c_str(), &stFileInfo);
-	if (intStat !=0){
-		std::cerr<< "ERROR: cannot open file " << bedfile << "\n";
-		exit(1);
-	}
+    intStat = stat(bedfile.c_str(), &stFileInfo);
+    if (intStat !=0){
+        std::cerr<< "ERROR: cannot open file " << bedfile << "\n";
+        exit(1);
+    }
     while(getline(in, st)){
-    	buf.clear();
-    	stringstream ss(st);
-    	line.clear();
-    	while (ss>> buf){
-    		line.push_back(buf);
-    	}
-    	string chr = line[0];
-    	int start = atoi(line[1].c_str());
-    	int stop = atoi(line[2].c_str());
-    	if (toreturn.find(chr) == toreturn.end()) {
-    		vector<pair<int, int> > tmp;
-    		toreturn.insert(make_pair(chr, tmp));
-    	}
-    	toreturn[chr].push_back(make_pair(start, stop));
+        buf.clear();
+        stringstream ss(st);
+        line.clear();
+        while (ss>> buf){
+            line.push_back(buf);
+        }
+        string chr = line[0];
+        int start = atoi(line[1].c_str());
+        int stop = atoi(line[2].c_str());
+        if (toreturn.find(chr) == toreturn.end()) {
+            vector<pair<int, int> > tmp;
+            toreturn.insert(make_pair(chr, tmp));
+        }
+        toreturn[chr].push_back(make_pair(start, stop));
 
     }
 
-	// check to make sure all entries are ordered
+    // check to make sure all entries are ordered
 
-	for (map<string, vector<pair<int, int> > >::iterator it = toreturn.begin(); it != toreturn.end(); it++){
-		vector<pair<int, int> > tmp = it->second;
-		pair<int, int> prev = tmp[0];
-		if (prev.second < prev.first) {
-				cerr<<"ERROR: start and stop positions in bed file out of order: "<< it->first << " "<< prev.first<< " "<< prev.second << "\n";
-				exit(1);
-		}
-		for (int i = 1; i < tmp.size(); i++){
-			pair<int, int> current = tmp[i];
-			//cout << current.first << " "<< current.second << " "<< prev.second << "\n";
-			if (current.second < current.first) {
-					cerr<<"ERROR: start and stop positions in bed file out of order: "<< it->first << " "<< current.first<< " "<< current.second << "\n";
-					exit(1);
-			}
-			if (current.first < prev.second) {
-						cerr<<"ERROR: bed file out of order: "<< it->first << " "<< prev.first<< " "<< prev.second << "\n" << it->first << " "<< current.first<< " "<< current.second << "\n";
-						exit(1);
-			}
-			prev =tmp[i];
-		}
-	}
-	return toreturn;
+    for (map<string, vector<pair<int, int> > >::iterator it = toreturn.begin(); it != toreturn.end(); it++){
+        vector<pair<int, int> > tmp = it->second;
+        pair<int, int> prev = tmp[0];
+        if (prev.second < prev.first) {
+            cerr<<"ERROR: start and stop positions in bed file out of order: "<< it->first << " "<< prev.first<< " "<< prev.second << "\n";
+            exit(1);
+        }
+        for (int i = 1; i < tmp.size(); i++){
+            pair<int, int> current = tmp[i];
+            //cout << current.first << " "<< current.second << " "<< prev.second << "\n";
+            if (current.second < current.first) {
+                cerr<<"ERROR: start and stop positions in bed file out of order: "<< it->first << " "<< current.first<< " "<< current.second << "\n";
+                exit(1);
+            }
+            if (current.first < prev.second) {
+                cerr<<"ERROR: bed file out of order: "<< it->first << " "<< prev.first<< " "<< prev.second << "\n" << it->first << " "<< current.first<< " "<< current.second << "\n";
+                exit(1);
+            }
+            prev =tmp[i];
+        }
+    }
+    return toreturn;
 
 }
 
 void SNPs_PW::make_segments(string bedfile){
-	segments.clear();
-	map<string, vector<pair<int, int> > > bedsegs = read_bedfile(bedfile);
-	for (int i = 0; i < chrnames.size(); i++){
-		string tmpchr = chrnames[i];
-		//cout << tmpchr << "\n";
-		if (bedsegs.find(tmpchr) == bedsegs.end()){
-			cerr << "ERROR: chromsome "<< tmpchr << " not found in .bed file\n";
-			exit(1);
-		}
-		vector<pair<int, int> > intervals = bedsegs[tmpchr];
-		pair<int, int> chromosome = chrsegments[i];
-		pair<int, int> currentseg = intervals[0];
-		int j = chromosome.first;
-		int start = j;
-		int intervalindex = 0;
-		while (j < chromosome.second){
-			int jpos = d[j].pos;
+    segments.clear();
+    map<string, vector<pair<int, int> > > bedsegs = read_bedfile(bedfile);
+    for (int i = 0; i < chrnames.size(); i++){
+        string tmpchr = chrnames[i];
+        //cout << tmpchr << "\n";
+        if (bedsegs.find(tmpchr) == bedsegs.end()){
+            cerr << "ERROR: chromsome "<< tmpchr << " not found in .bed file\n";
+            exit(1);
+        }
+        vector<pair<int, int> > intervals = bedsegs[tmpchr];
+        pair<int, int> chromosome = chrsegments[i];
+        pair<int, int> currentseg = intervals[0];
+        int j = chromosome.first;
+        int start = j;
+        int intervalindex = 0;
+        while (j < chromosome.second){
+            int jpos = d[j].pos;
 
-			if (jpos < currentseg.first){
-				//cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here1\n";
-				cerr << "ERROR: current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
-				exit(1);
-			}
-			else if (jpos > currentseg.second and j == start){
-				//cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here2\n";
-				intervalindex++;
-				if (intervalindex >= intervals.size()){
-					cerr << "ERROR: position "<< jpos << " is outside range of bed file\n";
-					exit(1);
-				}
-				currentseg = intervals[intervalindex];
-			}
-			else if (jpos >=currentseg.first and jpos < currentseg.second) {
-				//cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here3\n";
-				j = j+1;
-			}
-			else if (jpos >= currentseg.second and j != start){
-				//cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here4\n";
-				//cout << start << " "<< j << " adding\n";
-				segments.push_back(make_pair(start, j));
-				start = j;
-				intervalindex++;
-				if (intervalindex >= intervals.size()){
-					cerr << "ERROR: position "<< jpos << " is outside range of bed file\n";
-					exit(1);
-				}
-				currentseg = intervals[intervalindex];
-				//j = j+1;
-			}
-			else{
-				cerr << "ERROR: missing something when reading bed? "<< jpos << " "<<  currentseg.first << " "<< currentseg.second << "\n";
-				exit(1);
-			}
+            if (jpos < currentseg.first){
+                //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here1\n";
+                cerr << "ERROR: current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
+                exit(1);
+            }
+            else if (jpos > currentseg.second and j == start){
+                //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here2\n";
+                intervalindex++;
+                if (intervalindex >= intervals.size()){
+                    cerr << "ERROR: position "<< jpos << " is outside range of bed file\n";
+                    exit(1);
+                }
+                currentseg = intervals[intervalindex];
+            }
+            else if (jpos >=currentseg.first and jpos < currentseg.second) {
+                //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here3\n";
+                j = j+1;
+            }
+            else if (jpos >= currentseg.second and j != start){
+                //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here4\n";
+                //cout << start << " "<< j << " adding\n";
+                segments.push_back(make_pair(start, j));
+                start = j;
+                intervalindex++;
+                if (intervalindex >= intervals.size()){
+                    cerr << "ERROR: position "<< jpos << " is outside range of bed file\n";
+                    exit(1);
+                }
+                currentseg = intervals[intervalindex];
+                //j = j+1;
+            }
+            else{
+                cerr << "ERROR: missing something when reading bed? "<< jpos << " "<<  currentseg.first << " "<< currentseg.second << "\n";
+                exit(1);
+            }
 
 
-		}
-		//cout << start << " "<< j << " done adding\n";
-		segments.push_back(make_pair(start, j));
-	}
+        }
+        //cout << start << " "<< j << " done adding\n";
+        segments.push_back(make_pair(start, j));
+    }
 }
 vector<pair<int, int> > SNPs_PW::read_dmodel(string infile){
-	vector<pair<int, int> > toreturn;
-	ifstream in(infile.c_str());
-	vector<string> line;
-	struct stat stFileInfo;
-	int intStat;
-	string st, buf;
+    vector<pair<int, int> > toreturn;
+    ifstream in(infile.c_str());
+    vector<string> line;
+    struct stat stFileInfo;
+    int intStat;
+    string st, buf;
 
-	intStat = stat(infile.c_str(), &stFileInfo);
-	if (intStat !=0){
-		std::cerr<< "ERROR: cannot open file " << infile << "\n";
-		exit(1);
-	}
-    while(getline(in, st)){
-    	buf.clear();
-    	stringstream ss(st);
-    	line.clear();
-    	while (ss>> buf){
-    		line.push_back(buf);
-    	}
-    	int start = atoi(line[0].c_str());
-    	int stop = atoi(line[1].c_str());
-    	assert(stop < start);
-    	if (stop < start){
-    		cerr <<"ERROR: in distance model "<< infile<< " , " << start << " is after "<< stop << "\n";
-    		exit(1);
-    	}
-    	toreturn.push_back(make_pair(start, stop));
+    intStat = stat(infile.c_str(), &stFileInfo);
+    if (intStat !=0){
+        std::cerr<< "ERROR: cannot open file " << infile << "\n";
+        exit(1);
     }
-	return toreturn;
+    while(getline(in, st)){
+        buf.clear();
+        stringstream ss(st);
+        line.clear();
+        while (ss>> buf){
+            line.push_back(buf);
+        }
+        int start = atoi(line[0].c_str());
+        int stop = atoi(line[1].c_str());
+        assert(stop < start);
+        if (stop < start){
+            cerr <<"ERROR: in distance model "<< infile<< " , " << start << " is after "<< stop << "\n";
+            exit(1);
+        }
+        toreturn.push_back(make_pair(start, stop));
+    }
+    return toreturn;
 }
 
 
 void SNPs_PW::init_segpriors(){
-	//segannot.clear();
-	segpriors.clear();
-	alpha.clear();
-	for (int i = 0; i < 5; i++) {
-		alpha.push_back(params->alpha_prior[i]);
-	}
-	//alpha.push_back(10);alpha.push_back(10);alpha.push_back(10);alpha.push_back(10);alpha.push_back(10);
-	//segannotnames.clear();
-	//vector<double> segmeans;
-	//vector<double> means2sort;
+    //segannot.clear();
+    segpriors.clear();
+    alpha.clear();
+    for (int i = 0; i < 5; i++) {
+        alpha.push_back(params->alpha_prior[i]);
+    }
+    //alpha.push_back(10);alpha.push_back(10);alpha.push_back(10);alpha.push_back(10);alpha.push_back(10);
+    //segannotnames.clear();
+    //vector<double> segmeans;
+    //vector<double> means2sort;
 
-	for (vector<pair<int, int> >::iterator it = segments.begin(); it != segments.end(); it++){
-		vector<double> sp;
-		sp.push_back(0.2);sp.push_back(0.2);sp.push_back(0.2);sp.push_back(0.2);sp.push_back(0.2);
-		segpriors.push_back(sp);
-		/*
-		if (params->segannot.size() > 0){
-			double segmean = 0.0;
-			int total = 0;
-			for (int i = it->first; i < it->second; i++){
-				segmean += d[i].dens;
-				total ++;
-			}
-			segmeans.push_back( segmean / (double) total);
-			means2sort.push_back( segmean / (double) total);
-		}
-		*/
-	}
+    for (vector<pair<int, int> >::iterator it = segments.begin(); it != segments.end(); it++){
+        vector<double> sp;
+        sp.push_back(0.2);sp.push_back(0.2);sp.push_back(0.2);sp.push_back(0.2);sp.push_back(0.2);
+        segpriors.push_back(sp);
+        /*
+           if (params->segannot.size() > 0){
+           double segmean = 0.0;
+           int total = 0;
+           for (int i = it->first; i < it->second; i++){
+           segmean += d[i].dens;
+           total ++;
+           }
+           segmeans.push_back( segmean / (double) total);
+           means2sort.push_back( segmean / (double) total);
+           }
+           */
+    }
 
 
-	/*
-	if (params->segannot.size() < 1) return;
+    /*
+       if (params->segannot.size() < 1) return;
 
-	segannotnames.push_back(params->segannot[0] +"_lo");
-	segannotnames.push_back(params->segannot[0] +"_hi");
-	sort(means2sort.begin(), means2sort.end());
-	double locutoff = means2sort[floor( (double) means2sort.size()* params->loquant ) ];
-	double hicutoff = means2sort[floor( (double) means2sort.size()* params->hiquant ) ];
-	for (int i = 0; i < segments.size(); i++){
-		vector<bool> annots;
-		double m = segmeans[i];
-		if (m <= locutoff) annots.push_back(true);
-		else annots.push_back(false);
-		if (m >= hicutoff) annots.push_back(true);
-		else annots.push_back(false);
-		segannot.push_back(annots);
-	}
-	*/
+       segannotnames.push_back(params->segannot[0] +"_lo");
+       segannotnames.push_back(params->segannot[0] +"_hi");
+       sort(means2sort.begin(), means2sort.end());
+       double locutoff = means2sort[floor( (double) means2sort.size()* params->loquant ) ];
+       double hicutoff = means2sort[floor( (double) means2sort.size()* params->hiquant ) ];
+       for (int i = 0; i < segments.size(); i++){
+       vector<bool> annots;
+       double m = segmeans[i];
+       if (m <= locutoff) annots.push_back(true);
+       else annots.push_back(false);
+       if (m >= hicutoff) annots.push_back(true);
+       else annots.push_back(false);
+       segannot.push_back(annots);
+       }
+       */
 }
-
 void SNPs_PW::load_snps_pw(string infile, vector<string> annot, vector<string> dannot, vector<string> segannot){
-	igzstream in(infile.c_str()); //only gzipped files
-	vector<string> line;
-	struct stat stFileInfo;
-	int intStat;
-	string st, buf;
+    igzstream in(infile.c_str()); //only gzipped files
+    vector<string> line;
+//d.clear();
+    struct stat stFileInfo;
+    int intStat;
+    string st, buf;
 
-	intStat = stat(infile.c_str(), &stFileInfo);
-	if (intStat !=0){
-		std::cerr<< "ERROR: cannot open file " << infile << "\n";
-		exit(1);
-	}
+    intStat = stat(infile.c_str(), &stFileInfo);
+    if (intStat !=0){
+        std::cerr<< "ERROR: cannot open file " << infile << "\n";
+        exit(1);
+    }
 
-	// read header
-	getline(in, st);
-	buf.clear();
-	stringstream ss(st);
-	line.clear();
-	while (ss>> buf){
-		line.push_back(buf);
-	}
+    // read header
+    getline(in, st);
+    buf.clear();
+    stringstream ss(st);
+    line.clear();
+    while (ss>> buf){
+        line.push_back(buf);
+    }
 
-	//make a map of header to index
-	map<string, int> header_index;
-	for (int i = 0; i < line.size(); i++){
-		header_index[line[i]] = i;
-	}
-	// get the indices of the annotations
-	vector<int> annot_index;
-   	for (vector<string>::iterator it = annot.begin(); it != annot.end(); it++){
-   		int i = 0;
-   		bool found = false;
-   		while (i < line.size() and !found){
-   			if (line[i] == *it) {
-   				annot_index.push_back(i);
-   				found = true;
-   			}
-   			i++;
-   		}
-   		if (!found){
-   			cerr << "ERROR: cannot find annotation "<< *it << "\n";
-   			exit(1);
-   		}
-    	annotnames.push_back(*it);
-   	}
+    //make a map of header to index
+    map<string, int> header_index;
+    for (int i = 0; i < line.size(); i++){
+        header_index[line[i]] = i;
+    }
+    // get the indices of the annotations
+    vector<int> annot_index;
+    for (vector<string>::iterator it = annot.begin(); it != annot.end(); it++){
+        int i = 0;
+        bool found = false;
+        while (i < line.size() and !found){
+            if (line[i] == *it) {
+                annot_index.push_back(i);
+                found = true;
+            }
+            i++;
+        }
+        if (!found){
+            cerr << "ERROR: cannot find annotation "<< *it << "\n";
+            exit(1);
+        }
+        annotnames.push_back(*it);
+    }
 
-   	// get indices of distance annotations
-   	vector<int> dannot_index;
-   	for (int j = 0; j < dannot.size(); j++){
+    // get indices of distance annotations
+    vector<int> dannot_index;
+    for (int j = 0; j < dannot.size(); j++){
 
-   		string jname = dannot[j];
-   		int i = 0;
-   		bool found = false;
-   		while (i < line.size() and !found){
-   			if (line[i] == jname) {
-   				dannot_index.push_back(i);
-   				found = true;
-   			}
-   			i++;
-   		}
-   		if (!found){
-   			cerr << "ERROR: cannot find distance annotation "<< jname << "\n";
-   			exit(1);
-   		}
-   		append_dannotnames(jname, dmodels[j]);
-   	}
-   	// get indices for segannot
-   	int segannotindex;
-   	if (segannot.size() > 0){
-   		if (header_index.find(segannot[0]) == header_index.end()){
-   			cerr << "ERROR: cannot find segment annotation "<< segannot[0] << "\n";
-   			exit(1);
-   		}
-   		segannotindex = header_index[segannot[0]];
-   	}
-   	// get indices for the rs, maf, chr, pos, N, Ncase, Ncontrol,
-   	int rsindex, chrindex, posindex, segnumberindex, condindex, Z1index, Z2index, V1index, V2index;
+        string jname = dannot[j];
+        int i = 0;
+        bool found = false;
+        while (i < line.size() and !found){
+            if (line[i] == jname) {
+                dannot_index.push_back(i);
+                found = true;
+            }
+            i++;
+        }
+        if (!found){
+            cerr << "ERROR: cannot find distance annotation "<< jname << "\n";
+            exit(1);
+        }
+        append_dannotnames(jname, dmodels[j]);
+    }
+    // get indices for segannot
+    int segannotindex;
+    if (segannot.size() > 0){
+        if (header_index.find(segannot[0]) == header_index.end()){
+            cerr << "ERROR: cannot find segment annotation "<< segannot[0] << "\n";
+            exit(1);
+        }
+        segannotindex = header_index[segannot[0]];
+    }
+    // get indices for the rs, maf, chr, pos, N, Ncase, Ncontrol,
+    int rsindex, chrindex, posindex, segnumberindex, condindex, Z1index, Z2index, V1index, V2index;
 
-   	if (header_index.find("SNPID") == header_index.end()){
-   		cerr << "ERROR: cannot find SNPID in header\n";
-   		exit(1);
-   	}
-   	else rsindex = header_index["SNPID"];
+    if (header_index.find("SNPID") == header_index.end()){
+        cerr << "ERROR: cannot find SNPID in header\n";
+        exit(1);
+    }
+    else rsindex = header_index["SNPID"];
 
- 	if (header_index.find("CHR") == header_index.end()){
-   		cerr << "ERROR: cannot find CHR in header\n";
-   		exit(1);
-   	}
-   	else chrindex = header_index["CHR"];
+    if (header_index.find("CHR") == header_index.end()){
+        cerr << "ERROR: cannot find CHR in header\n";
+        exit(1);
+    }
+    else chrindex = header_index["CHR"];
 
- 	if (header_index.find("POS") == header_index.end()){
-   		cerr << "ERROR: cannot find POS in header\n";
-   		exit(1);
-   	}
-   	else posindex = header_index["POS"];
+    if (header_index.find("POS") == header_index.end()){
+        cerr << "ERROR: cannot find POS in header\n";
+        exit(1);
+    }
+    else posindex = header_index["POS"];
 
- 	if (header_index.find("Z_"+params->pheno1) == header_index.end()){
- 		cerr << "ERROR: cannot find Z_"+params->pheno1+" in header\n";
- 		exit(1);
- 	}
-	else Z1index = header_index["Z_"+params->pheno1];
+    if (header_index.find("Z_"+params->pheno1) == header_index.end()){
+        cerr << "ERROR: cannot find Z_"+params->pheno1+" in header\n";
+        exit(1);
+    }
+    else Z1index = header_index["Z_"+params->pheno1];
 
-	if (header_index.find("V_"+params->pheno1) == header_index.end()){
- 		cerr << "ERROR: cannot find V_"+params->pheno1+" in header\n";
- 		exit(1);
- 	}
-	else V1index = header_index["V_"+params->pheno1];
+    if (header_index.find("V_"+params->pheno1) == header_index.end()){
+        cerr << "ERROR: cannot find V_"+params->pheno1+" in header\n";
+        exit(1);
+    }
+    else V1index = header_index["V_"+params->pheno1];
 
-	if (header_index.find("Z_"+params->pheno2) == header_index.end()){
- 		cerr << "ERROR: cannot find Z_"+params->pheno2+" in header\n";
- 		exit(1);
- 	}
-	else Z2index = header_index["Z_"+params->pheno2];
-	if (header_index.find("V_"+params->pheno2) == header_index.end()){
- 		cerr << "ERROR: cannot find V_"+params->pheno2+" in header\n";
- 		exit(1);
- 	}
-	else V2index = header_index["V_"+params->pheno2];
+    if (header_index.find("Z_"+params->pheno2) == header_index.end()){
+        cerr << "ERROR: cannot find Z_"+params->pheno2+" in header\n";
+        exit(1);
+    }
+    else Z2index = header_index["Z_"+params->pheno2];
+    if (header_index.find("V_"+params->pheno2) == header_index.end()){
+        cerr << "ERROR: cannot find V_"+params->pheno2+" in header\n";
+        exit(1);
+    }
+    else V2index = header_index["V_"+params->pheno2];
 
-	if (header_index.find("SEGNUMBER") == header_index.end() && (params->finemap || params->numberedseg)){
-   		cerr << "ERROR: cannot find SEGNUMBER in header\n";
-   		exit(1);
-   	}
-   	else segnumberindex = header_index["SEGNUMBER"];
+    if (header_index.find("SEGNUMBER") == header_index.end() && (params->finemap || params->numberedseg)){
+        cerr << "ERROR: cannot find SEGNUMBER in header\n";
+        exit(1);
+    }
+    else segnumberindex = header_index["SEGNUMBER"];
 
-	if (params->cond && header_index.find(params->testcond_annot) == header_index.end()){
-		cerr << "ERROR: cannot find annotation "<< params->testcond_annot << "\n";
-		exit(1);
-	}
-	else if (params->cond) condindex = header_index[params->testcond_annot];
-	string oldchr = "NA";
+    if (params->cond && header_index.find(params->testcond_annot) == header_index.end()){
+        cerr << "ERROR: cannot find annotation "<< params->testcond_annot << "\n";
+        exit(1);
+    }
+    else if (params->cond) condindex = header_index[params->testcond_annot];
+    string oldchr = "NA";
     while(getline(in, st)){
-    	buf.clear();
-    	stringstream ss(st);
-    	line.clear();
-    	while (ss>> buf){
-    		line.push_back(buf);
-    	}
-    	string rs = line[rsindex];
-    	string chr = line[chrindex];
+        buf.clear();
+        stringstream ss(st);
+        line.clear();
+        while (ss>> buf){
+            line.push_back(buf);
+        }
+        string rs = line[rsindex];
+        string chr = line[chrindex];
 
-    	if (line[Z1index] == "NA" || line[Z2index]==  "NA") continue;
-    	double Z1 = atof(line[Z1index].c_str());
-    	double Z2 = atof(line[Z2index].c_str());
-    	double V1 = atof(line[V1index].c_str());
-    	double V2 = atof(line[V2index].c_str());
-    	assert(V1 >0);
-    	assert(V2 >0);
-    	if (chr != oldchr) oldchr = chr;
-    	if (params->dropchr and chr == params->chrtodrop) continue;
-    	int pos = atoi(line[posindex].c_str());
-    	vector<bool> an;
-    	vector<int> dists;
-    	for (vector<int>::iterator it = annot_index.begin(); it != annot_index.end(); it++){
-    		assert(line[*it] == "1" || line[*it] == "0");
-    		if (line[*it] == "1") an.push_back(true);
-    		else if (line[*it] == "0") an.push_back(false);
-    		else{
-    			cerr << "ERROR: only 0 and 1 allowed for annotations, found "<< line[*it] <<"\n";
-    			exit(1);
-    		}
-    	}
-    	for (vector<int>::iterator it = dannot_index.begin(); it != dannot_index.end(); it++){
-    		dists.push_back( atoi(line[*it].c_str()));
-    	}
+        if (line[Z1index] == "NA" || line[Z2index]==  "NA") continue;
+        double Z1 = atof(line[Z1index].c_str());
+        double Z2 = atof(line[Z2index].c_str());
+        double V1 = atof(line[V1index].c_str());
+        double V2 = atof(line[V2index].c_str());
+        assert(V1 >0);
+        assert(V2 >0);
+        if (chr != oldchr) oldchr = chr;
+        if (params->dropchr and chr == params->chrtodrop) continue;
+        int pos = atoi(line[posindex].c_str());
+        vector<bool> an;
+        vector<int> dists;
+        for (vector<int>::iterator it = annot_index.begin(); it != annot_index.end(); it++){
+            assert(line[*it] == "1" || line[*it] == "0");
+            if (line[*it] == "1") an.push_back(true);
+            else if (line[*it] == "0") an.push_back(false);
+            else{
+                cerr << "ERROR: only 0 and 1 allowed for annotations, found "<< line[*it] <<"\n";
+                exit(1);
+            }
+        }
+        for (vector<int>::iterator it = dannot_index.begin(); it != dannot_index.end(); it++){
+            dists.push_back( atoi(line[*it].c_str()));
+        }
 
-    	SNP_PW s(rs, chr , pos, Z1, Z2, V1, V2, an, dists, dmodels, params->V, params->cor);
-    	if (params->finemap || params->numberedseg){
-    		int snumber = atoi(line[segnumberindex].c_str());
-    		s.chunknumber = snumber;
-    	}
-    	if (segannot.size() > 0) s.dens = atof(line[segannotindex].c_str());
+        SNP_PW s(rs, chr , pos, Z1, Z2, V1, V2, an, dists, dmodels, params->V, params->cor);
+        if (params->finemap || params->numberedseg){
+            int snumber = atoi(line[segnumberindex].c_str());
+            s.chunknumber = snumber;
+        }
+        if (segannot.size() > 0) s.dens = atof(line[segannotindex].c_str());
 
 
-    	if (params->cond){
-    		if (line[condindex] == "1") s.condannot =true;
-    		else if (line[condindex] == "0") s.condannot = false;
-    		else{
-    			cerr << "ERROR: only 0 and 1 allowed for annotations, found "<< line[condindex] <<"\n";
-    			exit(1);
-    		}
-    	}
-    	d.push_back(s);
+        if (params->cond){
+            if (line[condindex] == "1") s.condannot =true;
+            else if (line[condindex] == "0") s.condannot = false;
+            else{
+                cerr << "ERROR: only 0 and 1 allowed for annotations, found "<< line[condindex] <<"\n";
+                exit(1);
+            }
+        }
+        d.push_back(s);
     }
 }
 
 
 void SNPs_PW::append_dannotnames(string name, vector<pair<int, int> > model){
-	for (vector<pair<int, int> >::iterator it = model.begin(); it != model.end(); it++){
-		stringstream ss;
-		ss << name << "_" << it->first << "_"<< it->second;
-		annotnames.push_back(ss.str());
-	}
+    for (vector<pair<int, int> >::iterator it = model.begin(); it != model.end(); it++){
+        stringstream ss;
+        ss << name << "_" << it->first << "_"<< it->second;
+        annotnames.push_back(ss.str());
+    }
 }
 
 
 vector<pair< pair<int, int>, pair<double, double> > > SNPs_PW::get_cis(){
-	vector<pair<pair<int, int>, pair<double, double> > > toreturn;
-	vector<double> startalphas;
-	for (vector<double>::iterator it = alpha.begin(); it != alpha.end(); it++) startalphas.push_back(*it);
-	int sti = 0;
-	if (params->finemap) sti = 1;
-	for (int i = sti; i < alpha.size(); i++){
-		toreturn.push_back(get_cis_alpha(i));
-		alpha[i] = startalphas[i];
-		set_priors();
-	}
-	return toreturn;
+    vector<pair<pair<int, int>, pair<double, double> > > toreturn;
+    vector<double> startalphas;
+    for (vector<double>::iterator it = alpha.begin(); it != alpha.end(); it++) startalphas.push_back(*it);
+    int sti = 0;
+    if (params->finemap) sti = 1;
+    for (int i = sti; i < alpha.size(); i++){
+        toreturn.push_back(get_cis_alpha(i));
+        alpha[i] = startalphas[i];
+        set_priors();
+    }
+    return toreturn;
 }
 
 
 
 pair< pair<int, int>, pair<double, double> > SNPs_PW::get_cis_alpha(int which){
-	pair< pair<int, int>, pair<double, double> > toreturn;
-	double tau = 0.001;
-	double startlk = llk();
-	double thold = startlk - 2;
+    pair< pair<int, int>, pair<double, double> > toreturn;
+    double tau = 0.001;
+    double startlk = llk();
+    double thold = startlk - 2;
 
-	double min = -20.0;
-	double max = 20.0;
-	double test = alpha[which];
-	//cout <<  startlk << " "<< thold << " "<< test<< "\n";
-	//for (int i = 0; i < 5; i++) cout << alpha[i] <<  " "<< pi[i] << " "<<  i << "\n";
-	if (test > max) max = test+20.0;
-	if (test < min) min = test-20.0;
-	//if (max < 0) max = 20.0;
-	//if (min > 0) min = -20.0;
+    double min = -20.0;
+    double max = 20.0;
+    double test = alpha[which];
+    //cout <<  startlk << " "<< thold << " "<< test<< "\n";
+    //for (int i = 0; i < 5; i++) cout << alpha[i] <<  " "<< pi[i] << " "<<  i << "\n";
+    if (test > max) max = test+20.0;
+    if (test < min) min = test-20.0;
+    //if (max < 0) max = 20.0;
+    //if (min > 0) min = -20.0;
 
-	//upper
-	double hi;
-	double lo;
-	int convhi = 1;
-	int convlo = 1;
-	alpha[which] = max;
-	set_priors();
+    //upper
+    double hi;
+    double lo;
+    int convhi = 1;
+    int convlo = 1;
+    alpha[which] = max;
+    set_priors();
 
-	if (llk() > thold) hi = pi[which];
-	else{
-		alpha[which] = test;
-		set_priors();
-		double start = (test+max)/2;
+    if (llk() > thold) hi = pi[which];
+    else{
+        alpha[which] = test;
+        set_priors();
+        double start = (test+max)/2;
 
-		convhi = golden_section_alpha_ci(test, start, max, tau, which, thold);
-		hi = pi[which];
-	}
-	cout << hi << " "<< llk() << " hi\n";
-	//for (int i = 0; i < 5; i++) cout << alpha[i] <<  " "<< pi[i] << " "<<  i << "\n";
-	//lower
+        convhi = golden_section_alpha_ci(test, start, max, tau, which, thold);
+        hi = pi[which];
+    }
+    cout << hi << " "<< llk() << " hi\n";
+    //for (int i = 0; i < 5; i++) cout << alpha[i] <<  " "<< pi[i] << " "<<  i << "\n";
+    //lower
 
-	alpha[which] = test;
-	set_priors();
-	//cout << llk()<< " " << startlk << " "<< thold << "\n";
-	alpha[which] = min;
-	set_priors();
-	if (llk() > thold) lo = pi[which];
-	else{
-		alpha[which] = test;
-		set_priors();
-		double start = (test+min)/2;
-		convlo = golden_section_alpha_ci(min, start, test, tau, which, thold);
-		lo = pi[which];
-	}
-	cout << lo << " "<< llk() << " lo\n";
-	pair<int, int> conv = make_pair(convlo, convhi);
-	pair<double, double> ci = make_pair(lo, hi);
-	return make_pair(conv, ci);
+    alpha[which] = test;
+    set_priors();
+    //cout << llk()<< " " << startlk << " "<< thold << "\n";
+    alpha[which] = min;
+    set_priors();
+    if (llk() > thold) lo = pi[which];
+    else{
+        alpha[which] = test;
+        set_priors();
+        double start = (test+min)/2;
+        convlo = golden_section_alpha_ci(min, start, test, tau, which, thold);
+        lo = pi[which];
+    }
+    cout << lo << " "<< llk() << " lo\n";
+    pair<int, int> conv = make_pair(convlo, convhi);
+    pair<double, double> ci = make_pair(lo, hi);
+    return make_pair(conv, ci);
 }
 
 
 /*
 
-pair< pair<int, int>, pair<double, double> > SNPs::get_cis_condlambda(){
-	pair< pair<int, int>, pair<double, double> > toreturn;
-	double startlk = llk();
-	double thold = startlk - 2;
-	cout <<  startlk << " "<< thold << "\n";
-	double min = -20.0;
-	double max = 20.0;
-	double test = condlambda;
-	if (test > max) max = test+20.0;
-	if (test < min) min = test-20.0;
-	if (max < 0) max = 20.0;
-	if (min > 0) min = -20.0;
-	double start = (test+max)/2;
-	double tau = 0.001;
-	int convhi = golden_section_condlambda_ci(test, start, max, tau, thold);
-	double hi = condlambda;
-	cout << hi << " "<< llk() << " hi\n";
-	start = (test+min)/2;
-	int convlo = golden_section_condlambda_ci(min, start, test, tau, thold);
-	double lo = condlambda;
-	cout << lo << " "<< llk() << " lo\n";
-	pair<int, int> conv = make_pair(convlo, convhi);
-	pair<double, double> ci = make_pair(lo, hi);
-	return make_pair(conv, ci);
+   pair< pair<int, int>, pair<double, double> > SNPs::get_cis_condlambda(){
+   pair< pair<int, int>, pair<double, double> > toreturn;
+   double startlk = llk();
+   double thold = startlk - 2;
+   cout <<  startlk << " "<< thold << "\n";
+   double min = -20.0;
+   double max = 20.0;
+   double test = condlambda;
+   if (test > max) max = test+20.0;
+   if (test < min) min = test-20.0;
+   if (max < 0) max = 20.0;
+   if (min > 0) min = -20.0;
+   double start = (test+max)/2;
+   double tau = 0.001;
+   int convhi = golden_section_condlambda_ci(test, start, max, tau, thold);
+   double hi = condlambda;
+   cout << hi << " "<< llk() << " hi\n";
+   start = (test+min)/2;
+   int convlo = golden_section_condlambda_ci(min, start, test, tau, thold);
+   double lo = condlambda;
+   cout << lo << " "<< llk() << " lo\n";
+   pair<int, int> conv = make_pair(convlo, convhi);
+   pair<double, double> ci = make_pair(lo, hi);
+   return make_pair(conv, ci);
+   }
+   */
+
+/*
+   pair< pair<int, int>, pair<double, double> > SNPs::get_cis_segpi(){
+   pair< pair<int, int>, pair<double, double> > toreturn;
+   double startsegpi = segpi;
+   double startlk = llk();
+   double thold = startlk - 2;
+//cout <<  startlk << " "<< thold << "\n";
+double test =  log(startsegpi) - log(1-startsegpi);
+
+double min = -10.0;
+double max = 10.0;
+int nit = 0;
+double start = (test+max)/2;
+double tau = 0.001;
+int convhi = golden_section_segpi_ci(test, start, max, tau, thold,  &nit);
+double hi = segpi;
+cout << hi << " "<< llk() << " hi\n";
+start = (test+min)/2;
+nit = 0;
+int convlo = golden_section_segpi_ci(min, start, test, tau, thold, &nit);
+double lo = segpi;
+cout << lo << " "<< llk() << " lo\n";
+pair<int, int> conv = make_pair(convlo, convhi);
+pair<double, double> ci = make_pair(lo, hi);
+return make_pair(conv, ci);
 }
+
 */
 
 /*
-pair< pair<int, int>, pair<double, double> > SNPs::get_cis_segpi(){
-	pair< pair<int, int>, pair<double, double> > toreturn;
-	double startsegpi = segpi;
-	double startlk = llk();
-	double thold = startlk - 2;
-	//cout <<  startlk << " "<< thold << "\n";
-	double test =  log(startsegpi) - log(1-startsegpi);
+   pair< pair<int, int>, pair<double, double> > SNPs::get_cis_lambda(int which){
+   pair< pair<int, int>, pair<double, double> > toreturn;
 
-	double min = -10.0;
-	double max = 10.0;
-	int nit = 0;
-	double start = (test+max)/2;
-	double tau = 0.001;
-	int convhi = golden_section_segpi_ci(test, start, max, tau, thold,  &nit);
-	double hi = segpi;
-	cout << hi << " "<< llk() << " hi\n";
-	start = (test+min)/2;
-	nit = 0;
-	int convlo = golden_section_segpi_ci(min, start, test, tau, thold, &nit);
-	double lo = segpi;
-	cout << lo << " "<< llk() << " lo\n";
-	pair<int, int> conv = make_pair(convlo, convhi);
-	pair<double, double> ci = make_pair(lo, hi);
-	return make_pair(conv, ci);
-}
-
-*/
-
-/*
-pair< pair<int, int>, pair<double, double> > SNPs::get_cis_lambda(int which){
-	pair< pair<int, int>, pair<double, double> > toreturn;
-
-	double startlk = llk();
-	double thold = startlk - 2;
-	cout <<  startlk << " "<< thold << "\n";
-	double min = -20.0;
-	double max = 20.0;
-	double test = lambdas[which];
-	if (test > max) max = test+20.0;
-	if (test < min) min = test-20.0;
-	if (max < 0) max = 20.0;
-	if (min > 0) min = -20.0;
-	double start = (test+max)/2;
-	double tau = 0.001;
-	int convhi = golden_section_lambda_ci(test, start, max, tau, which, thold);
-	double hi = lambdas[which];
-	cout << hi << " "<< llk() << " hi\n";
-	start = (test+min)/2;
-	int convlo = golden_section_lambda_ci(min, start, test, tau, which, thold);
-	double lo = lambdas[which];
-	cout << lo << " "<< llk() << " lo\n";
-	pair<int, int> conv = make_pair(convlo, convhi);
-	pair<double, double> ci = make_pair(lo, hi);
-	return make_pair(conv, ci);
-}
-*/
+   double startlk = llk();
+   double thold = startlk - 2;
+   cout <<  startlk << " "<< thold << "\n";
+   double min = -20.0;
+   double max = 20.0;
+   double test = lambdas[which];
+   if (test > max) max = test+20.0;
+   if (test < min) min = test-20.0;
+   if (max < 0) max = 20.0;
+   if (min > 0) min = -20.0;
+   double start = (test+max)/2;
+   double tau = 0.001;
+   int convhi = golden_section_lambda_ci(test, start, max, tau, which, thold);
+   double hi = lambdas[which];
+   cout << hi << " "<< llk() << " hi\n";
+   start = (test+min)/2;
+   int convlo = golden_section_lambda_ci(min, start, test, tau, which, thold);
+   double lo = lambdas[which];
+   cout << lo << " "<< llk() << " lo\n";
+   pair<int, int> conv = make_pair(convlo, convhi);
+   pair<double, double> ci = make_pair(lo, hi);
+   return make_pair(conv, ci);
+   }
+   */
 
 /*
-pair< pair<int, int>, pair<double, double> > SNPs::get_cis_seglambda(int which){
-	pair< pair<int, int>, pair<double, double> > toreturn;
+   pair< pair<int, int>, pair<double, double> > SNPs::get_cis_seglambda(int which){
+   pair< pair<int, int>, pair<double, double> > toreturn;
 
-	double startlk = llk();
-	double thold = startlk - 2;
-	cout <<  startlk << " "<< thold << "\n";
-	double min = -20.0;
-	double max = 20.0;
-	double test = seglambdas[which];
-	if (test > max) max = test+20.0;
-	if (test < min) min = test-20.0;
-	if (max < 0) max = 20.0;
-	if (min > 0) min = -20.0;
-	double start = (test+max)/2;
-	double tau = 0.001;
-	int convhi = golden_section_seglambda_ci(test, start, max, tau, which, thold);
-	double hi = seglambdas[which];
-	cout << hi << " "<< llk() << " hi\n";
-	start = (test+min)/2;
-	int convlo = golden_section_seglambda_ci(min, start, test, tau, which, thold);
-	double lo = seglambdas[which];
-	cout << lo << " "<< llk() << " lo\n";
-	pair<int, int> conv = make_pair(convlo, convhi);
-	pair<double, double> ci = make_pair(lo, hi);
-	return make_pair(conv, ci);
-}
-*/
+   double startlk = llk();
+   double thold = startlk - 2;
+   cout <<  startlk << " "<< thold << "\n";
+   double min = -20.0;
+   double max = 20.0;
+   double test = seglambdas[which];
+   if (test > max) max = test+20.0;
+   if (test < min) min = test-20.0;
+   if (max < 0) max = 20.0;
+   if (min > 0) min = -20.0;
+   double start = (test+max)/2;
+   double tau = 0.001;
+   int convhi = golden_section_seglambda_ci(test, start, max, tau, which, thold);
+   double hi = seglambdas[which];
+   cout << hi << " "<< llk() << " hi\n";
+   start = (test+min)/2;
+   int convlo = golden_section_seglambda_ci(min, start, test, tau, which, thold);
+   double lo = seglambdas[which];
+   cout << lo << " "<< llk() << " lo\n";
+   pair<int, int> conv = make_pair(convlo, convhi);
+   pair<double, double> ci = make_pair(lo, hi);
+   return make_pair(conv, ci);
+   }
+   */
 
 void SNPs_PW::print(){
-	cout << "rs chr pos BF1 BF2";
-	for (int i =0; i < nannot; i++) cout << " "<< annotnames[i];
-	cout << "\n";
-	for (vector<SNP_PW>::iterator it = d.begin(); it != d.end(); it++){
-		cout << it->id << " "<< it->chr << " "<< it->pos << " "<< it->BF1 <<  " "<< it->BF2 << " "<< it->BF3;
-		for (int i = 0; i < nannot; i++) cout << " "<< it->annot[i];
-		cout << "\n";
-	}
+    cout << "rs chr pos BF1 BF2";
+    for (int i =0; i < nannot; i++) cout << " "<< annotnames[i];
+    cout << "\n";
+    for (vector<SNP_PW>::iterator it = d.begin(); it != d.end(); it++){
+        cout << it->id << " "<< it->chr << " "<< it->pos << " "<< it->BF1 <<  " "<< it->BF2 << " "<< it->BF3;
+        for (int i = 0; i < nannot; i++) cout << " "<< it->annot[i];
+        cout << "\n";
+    }
 }
 
 
 void SNPs_PW::print(string outfile, string outfile2){
-	ogzstream out(outfile.c_str());
-	ogzstream out2(outfile2.c_str());
-	out << "id chr pos logBF_1 logBF_2 logBF_3 Z_"<< params->pheno1<<" V_"<<params->pheno1<<" Z_"<< params->pheno2 << " V_"<<params->pheno2<<" pi_1 pi_2 pi_3 PPA_1 PPA_2 PPA_3 chunk";
-	out2 << "chunk NSNP chr st sp max_abs_Z_"<< params->pheno1<<" max_abs_Z_"<<params->pheno2<<" logBF_1 logBF_2 logBF_3 logBF_4 pi_1 pi_2 pi_3 pi_4 PPA_1 PPA_2 PPA_3 PPA_4";
-	for (vector<string>::iterator it = annotnames.begin(); it != annotnames.end(); it++) out << " "<< *it;
-	out << "\n";
-	for (vector<string>::iterator it = segannotnames.begin(); it != segannotnames.end(); it++) out2 << " "<< *it;
-	out2 << "\n";
-	int segnum = 0;
-	for (vector<pair<int, int> >::iterator it = segments.begin(); it != segments.end(); it++){
-		int stindex = it->first;
-		int spindex = it->second;
-		out2 << segnum << " " << spindex-stindex << " "<< d[stindex].chr << " "<< d[stindex].pos << " "<< d[spindex-1].pos << " ";
-		vector<double> segbfs = get_segbfs(segnum);
-		if (params->finemap){
-			double tmp = segbfs[0];
-			for (int i = 0; i < 4; i++) segbfs[i] = segbfs[i] - tmp;
-		}
-		double maxZ1 = 0;
-		double maxZ2 = 0;
-		double sumlbf1 = -1000;
-		double sumlbf2 = -1000;
-		double sumlbf3 = -1000;
-		for (int i = stindex; i < spindex; i++){
-			double Z1 = fabs(d[i].Z1);
-			double Z2 = fabs(d[i].Z2);
-			sumlbf1 = sumlog(sumlbf1, d[i].BF1);
-			sumlbf2 = sumlog(sumlbf2, d[i].BF2);
-			sumlbf3 = sumlog(sumlbf3, d[i].BF3);
-			if (Z1> maxZ1) maxZ1 = Z1;
-			if (Z2> maxZ2) maxZ2 = Z2;
-		}
-		vector<double> lpostodds;
-		vector<double> lpriorodds;
-		for (int i = 0; i < 4; i++) lpriorodds.push_back(log(pi[i+1]/pi[0]));
-		if (params->finemap){
-			for (int i = 0; i < 4; i++) lpriorodds[i] = log(pi[i+1]/pi[1]);
-		}
-		for (int i = 0; i < 4; i++) lpostodds.push_back(segbfs[i]+lpriorodds[i]);
-		vector<double> segPPA;
-		for (int i = 0; i < 4; i++){
-			double num = lpostodds[i];
-			double denom = 0;
-			for (int i = 0; i <4 ; i++) denom = sumlog(denom,  lpostodds[i]);
-			if (params->finemap){
-				denom = 0;
-				for (int i = 1; i < 4; i++) denom = sumlog(denom, lpostodds[i]);
-			}
-			segPPA.push_back(exp(num - denom));
-		}
+    ogzstream out(outfile.c_str());
+    ogzstream out2(outfile2.c_str());
+    out << "id chr pos logBF_1 logBF_2 logBF_3 Z_"<< params->pheno1<<" V_"<<params->pheno1<<" Z_"<< params->pheno2 << " V_"<<params->pheno2<<" pi_1 pi_2 pi_3 PPA_1 PPA_2 PPA_3 chunk";
+    out2 << "chunk NSNP chr st sp max_abs_Z_"<< params->pheno1<<" max_abs_Z_"<<params->pheno2<<" logBF_1 logBF_2 logBF_3 logBF_4 pi_1 pi_2 pi_3 pi_4 PPA_1 PPA_2 PPA_3 PPA_4";
+    for (vector<string>::iterator it = annotnames.begin(); it != annotnames.end(); it++) out << " "<< *it;
+    out << "\n";
+    for (vector<string>::iterator it = segannotnames.begin(); it != segannotnames.end(); it++) out2 << " "<< *it;
+    out2 << "\n";
+    int segnum = 0;
+    for (vector<pair<int, int> >::iterator it = segments.begin(); it != segments.end(); it++){
+        int stindex = it->first;
+        int spindex = it->second;
+        out2 << segnum << " " << spindex-stindex << " "<< d[stindex].chr << " "<< d[stindex].pos << " "<< d[spindex-1].pos << " ";
+        vector<double> segbfs = get_segbfs(segnum);
+        if (params->finemap){
+            double tmp = segbfs[0];
+            for (int i = 0; i < 4; i++) segbfs[i] = segbfs[i] - tmp;
+        }
+        double maxZ1 = 0;
+        double maxZ2 = 0;
+        double sumlbf1 = -1000;
+        double sumlbf2 = -1000;
+        double sumlbf3 = -1000;
+        for (int i = stindex; i < spindex; i++){
+            double Z1 = fabs(d[i].Z1);
+            double Z2 = fabs(d[i].Z2);
+            sumlbf1 = sumlog(sumlbf1, d[i].BF1);
+            sumlbf2 = sumlog(sumlbf2, d[i].BF2);
+            sumlbf3 = sumlog(sumlbf3, d[i].BF3);
+            if (Z1> maxZ1) maxZ1 = Z1;
+            if (Z2> maxZ2) maxZ2 = Z2;
+        }
+        vector<double> lpostodds;
+        vector<double> lpriorodds;
+        for (int i = 0; i < 4; i++) lpriorodds.push_back(log(pi[i+1]/pi[0]));
+        if (params->finemap){
+            for (int i = 0; i < 4; i++) lpriorodds[i] = log(pi[i+1]/pi[1]);
+        }
+        for (int i = 0; i < 4; i++) lpostodds.push_back(segbfs[i]+lpriorodds[i]);
+        vector<double> segPPA;
+        for (int i = 0; i < 4; i++){
+            double num = lpostodds[i];
+            double denom = 0;
+            for (int i = 0; i <4 ; i++) denom = sumlog(denom,  lpostodds[i]);
+            if (params->finemap){
+                denom = 0;
+                for (int i = 1; i < 4; i++) denom = sumlog(denom, lpostodds[i]);
+            }
+            segPPA.push_back(exp(num - denom));
+        }
 
-		out2 << maxZ1<< " "<< maxZ2<< " "<< segbfs[0] <<" "<< segbfs[1]<< " "<< segbfs[2]<< " "<< segbfs[3] << " " << pi[1]<< " "<< pi[2]<< " "<< pi[3]<< " "<< pi[4] << " "<< segPPA[0]<< " "<< segPPA[1]<< " "<< segPPA[2]<< " "<< segPPA[3];
-		for (int i = 0; i < nsegannot; i++) out2 << " "<< segannot[segnum][i];
-		out2 << "\n";
-		for (int i =stindex ; i < spindex; i++){
-			out << d[i].id << " "<< d[i].chr << " "<< d[i].pos << " "<< d[i].BF1 << " "<< d[i].BF2 << " " << d[i].BF3<< " "<< d[i].Z1 <<  " " << d[i].V1 << " "<< d[i].Z2 <<  " " << d[i].V2<< " "<< snppri[i][0]<< " "<< snppri[i][1]<< " "<< snppri[i][2] << " " << exp(d[i].BF1- sumlbf1) << " "<< exp(d[i].BF2- sumlbf2) << " "<< exp(d[i].BF3- sumlbf3) << " "<< segnum;
-			for (int j = 0; j < annotnames.size(); j++) out << " "<< d[i].annot[j];
-			out << "\n";
-		}
-		segnum++;
-	}
+        out2 << maxZ1<< " "<< maxZ2<< " "<< segbfs[0] <<" "<< segbfs[1]<< " "<< segbfs[2]<< " "<< segbfs[3] << " " << pi[1]<< " "<< pi[2]<< " "<< pi[3]<< " "<< pi[4] << " "<< segPPA[0]<< " "<< segPPA[1]<< " "<< segPPA[2]<< " "<< segPPA[3];
+        for (int i = 0; i < nsegannot; i++) out2 << " "<< segannot[segnum][i];
+        out2 << "\n";
+        for (int i =stindex ; i < spindex; i++){
+            out << d[i].id << " "<< d[i].chr << " "<< d[i].pos << " "<< d[i].BF1 << " "<< d[i].BF2 << " " << d[i].BF3<< " "<< d[i].Z1 <<  " " << d[i].V1 << " "<< d[i].Z2 <<  " " << d[i].V2<< " "<< snppri[i][0]<< " "<< snppri[i][1]<< " "<< snppri[i][2] << " " << exp(d[i].BF1- sumlbf1) << " "<< exp(d[i].BF2- sumlbf2) << " "<< exp(d[i].BF3- sumlbf3) << " "<< segnum;
+            for (int j = 0; j < annotnames.size(); j++) out << " "<< d[i].annot[j];
+            out << "\n";
+        }
+        segnum++;
+    }
 }
 
 
 /*
-double SNPs::cross10(bool penalize){
-	//do 10-fold cross validation
-	//
-	// split segments into groups
-	// L = 1/10* \sum_i L*(i)
-	// where L*(i) is the likelihood of data in group i after optimizing model without it
-	//
-	double toreturn =0;
-	vector< set<int> > split10 = make_cross10();
-	vector<double> Lstar;
-	for (vector<set<int> >::iterator it = split10.begin(); it != split10.end(); it++){
-		GSL_xv_optim(*it, penalize);
-		double tmpl = 0;
-		for (set<int>::iterator it2 = it->begin(); it2 != it->end(); it2++) tmpl += llk(*it2);
-		//cout << tmpl << "\n";
-		Lstar.push_back(tmpl);
-		toreturn += tmpl;
-	}
-	toreturn = toreturn /10.0;
-	return toreturn;
+   double SNPs::cross10(bool penalize){
+//do 10-fold cross validation
+//
+// split segments into groups
+// L = 1/10* \sum_i L*(i)
+// where L*(i) is the likelihood of data in group i after optimizing model without it
+//
+double toreturn =0;
+vector< set<int> > split10 = make_cross10();
+vector<double> Lstar;
+for (vector<set<int> >::iterator it = split10.begin(); it != split10.end(); it++){
+GSL_xv_optim(*it, penalize);
+double tmpl = 0;
+for (set<int>::iterator it2 = it->begin(); it2 != it->end(); it2++) tmpl += llk(*it2);
+//cout << tmpl << "\n";
+Lstar.push_back(tmpl);
+toreturn += tmpl;
+}
+toreturn = toreturn /10.0;
+return toreturn;
 }
 */
 
 /*
-vector<set<int> > SNPs::make_cross10(){
-	vector<set<int> > toreturn;
-	int nper = floor((double) segments.size() / 10.0);
-	for (int i = 0; i < 10; i++){
-		set<int> tmp;
-		for (int j = i*nper; j < i*nper+nper; j++) tmp.insert(j);
-		toreturn.push_back(tmp);
-	}
-	//for (vector<set<int> >::iterator it = toreturn.begin(); it != toreturn.end(); it++){
-	//	for (set<int>::iterator it2 = it->begin(); it2 != it->end(); it2++){
-	//		cout << *it2 << " ";
-	//	}
-	//	cout << "\n";
-	//}
+   vector<set<int> > SNPs::make_cross10(){
+   vector<set<int> > toreturn;
+   int nper = floor((double) segments.size() / 10.0);
+   for (int i = 0; i < 10; i++){
+   set<int> tmp;
+   for (int j = i*nper; j < i*nper+nper; j++) tmp.insert(j);
+   toreturn.push_back(tmp);
+   }
+//for (vector<set<int> >::iterator it = toreturn.begin(); it != toreturn.end(); it++){
+//	for (set<int>::iterator it2 = it->begin(); it2 != it->end(); it2++){
+//		cout << *it2 << " ";
+//	}
+//	cout << "\n";
+//}
 
-	return toreturn;
+return toreturn;
 
 }
 
 */
+void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){ 
+    segments.clear();
+    vector<string> input_filenames;
+    for (vector<string>::iterator it = p->multiple_regions.begin(); it != p->multiple_regions.end(); ++it){
+        cout << *it; 
+        cout << p->infile << endl; 
+        load_snps_pw(*it, params->wannot, params->dannot, params->segannot);
+        make_chrsegments();
+        input_filenames.push_back(*it);
+    }
+    map<string, vector<pair<int, int> > > bedsegs = read_bedfile(bedfile);
+    for (int i = 0; i < chrnames.size(); i++){
+        // write to file  with all the names. 
+        string tmpchr = chrnames[i];
+        //cout << tmpchr << "\n";
+        if (bedsegs.find(tmpchr) == bedsegs.end()){
+            cerr << "ERROR: chromsome "<< tmpchr << " not found in .bed file\n";
+            exit(1);
+        }
+        vector<pair<int, int> > intervals = bedsegs[tmpchr];
+        pair<int, int> chromosome = chrsegments[i];
+        pair<int, int> currentseg = intervals[0];
+        int j = chromosome.first;
+        int start = j;
+        int intervalindex = 0;
+        while (j < chromosome.second){
+            int jpos = d[j].pos;
 
-void SNPs_PW::make_segments(int size){
+            if (jpos < currentseg.first){
+                //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here1\n";
+                cerr << "ERROR: current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
+                exit(1);
+            }
+            else if (jpos > currentseg.second and j == start){
+                //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here2\n";
+                intervalindex++;
+                if (intervalindex >= intervals.size()){
+                    cerr << "ERROR: position "<< jpos << " is outside range of bed file\n";
+                    exit(1);
+                }
+                currentseg = intervals[intervalindex];
+            }
+            else if (jpos >=currentseg.first and jpos < currentseg.second) {
+                //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here3\n";
+                j = j+1;
+            }
+            else if (jpos >= currentseg.second and j != start){
+                //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here4\n";
+                //cout << start << " "<< j << " adding\n";
+                // If the current segment does not contain many SNPS remove it.
+                //
+                if ((j - start) < 200){
+                    cerr << "Removing window because it does not contain any SNPs." << endl;
+                }else{
+                segments.push_back(make_pair(start, j));
+                }
+                start = j;
+                intervalindex++;
+                if (intervalindex >= intervals.size()){
+                    cerr << "ERROR: position "<< jpos << " is outside range of bed file\n";
+                    exit(1);
+                }
+                currentseg = intervals[intervalindex];
+                //j = j+1;
+            }
+            else{
+                cerr << "ERROR: missing something when reading bed? "<< jpos << " "<<  currentseg.first << " "<< currentseg.second << "\n";
+                exit(1);
+            }
+
+
+        }
+        if ((j - start) < 200){
+            cerr << "Removing window as it does not contain enough SNPS" << endl;
+        }else{
+        //cout << start << " "<< j << " done adding\n";
+        segments.push_back(make_pair(start, j));
+        }
+    }
+}
+
+void SNPs_PW::make_segments2(int size, Fgwas_params *p){ 
+    segments.clear();
+    for (vector<string>::iterator it = p->multiple_regions.begin(); it != p->multiple_regions.end(); ++it){
+        cout << *it; 
+        cout << p->infile << endl; 
+        load_snps_pw(*it, params->wannot, params->dannot, params->segannot);
+        make_chrsegments();
+    }
+    int counter = 0;
+    for (vector<pair<int, int> >::iterator it = chrsegments.begin(); it != chrsegments.end(); it++){
+        cout << "What is going on ++ " << it->first<< " " << it->second << endl;
+        int starti = it->first;
+        int endi = it->second;
+        int length = endi-starti;
+        int bestmod = length % size;
+        int bestsize = size;
+        for (int i = size -20; i < size+20; i++){
+            if (i < 1) continue;
+            int test = length % i;
+            if (test < bestmod){
+                bestmod = test;
+                bestsize = i;
+            }
+        }
+        int nseg = length/bestsize + 1;
+        for (int i = 0; i < nseg; i++){
+            int sstart = starti+i*bestsize;
+            int send = starti+i*bestsize+bestsize;
+            if (i > (nseg-2))	send = endi;
+            cout << "Start segment " << sstart << " end segment " << send << endl;
+            segments.push_back(make_pair(sstart, send));
+            for (int i = sstart ; i < send ; i++) d[i].chunknumber = counter;
+            counter++;
+        }
+    }
+    
+}
+
+void SNPs_PW::make_segments(int size){ 
 	segments.clear();
 	int counter = 0;
 	for (vector<pair<int, int> >::iterator it = chrsegments.begin(); it != chrsegments.end(); it++){
+        cout << "What is going on ++ " << it->first<< " " << it->second << endl;
 		int starti = it->first;
 		int endi = it->second;
 		int length = endi-starti;
@@ -830,7 +958,7 @@ void SNPs_PW::make_segments(int size){
 				bestsize = i;
 			}
 		}
-		int nseg = length/bestsize;
+		int nseg = length/bestsize + 1;
 		for (int i = 0; i < nseg; i++){
 			int sstart = starti+i*bestsize;
 			int send = starti+i*bestsize+bestsize;
@@ -864,12 +992,12 @@ void SNPs_PW::make_segments_finemap(){
 }
 
 void SNPs_PW::make_chrsegments(){
-	chrsegments.clear();
-	chrnames.clear();
-	int i = 0;
+	int i = last_index; 
 	int start = i;
+    cout << i << " this is our index " << endl;
 	int startpos = d[i].pos;
 	string startchr = d[i].chr;
+    cout << "Does this work " << endl;
 	while (i < d.size()){
 		int tmppos = d[i].pos;
 		string tmpchr = d[i].chr;
@@ -884,6 +1012,7 @@ void SNPs_PW::make_chrsegments(){
 		i++;
 	}
 	int end = i;
+    last_index = i;
 	chrnames.push_back(startchr);
 	chrsegments.push_back(make_pair(start, end));
 }

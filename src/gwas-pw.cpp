@@ -24,6 +24,8 @@ void printopts(){
         //cout << "-dists [string:string] the name of the distance annotation(s) and the file(s) containing the distance model(s)\n";
         cout << "-k [integer] block size in number of SNPs (5000)\n";
         cout << "-cor [float] expected correlation in summary statistics under the null [0]\n";
+        cout << "-all-input [filename/s] eQTL input files for cis-ome analysis. \n" << endl;
+        cout << "-m [integer] minimum SNP-sized block" << endl; 
         //cout << "-dists [string:string] the name of the distance annotation(s) and the file(s) containing the distance model(s)\n";
         //cout << "-nburn [integer] iterations of burn-in (5000)\n";
         //cout << "-nsamp [integer] iterations of sampling (50000)\n";
@@ -47,11 +49,7 @@ int main(int argc, char *argv[]){
     }
     //get the input file
     if (cmdline.HasSwitch("-i")) p.infile = cmdline.GetArgument("-i", 0).c_str();
-    else{
-    	cerr << "ERROR: missing input file (-i)\n";
-        printopts();
-        exit(1);
-    }
+    
     //get the output file
     if (cmdline.HasSwitch("-o")) p.outstem = cmdline.GetArgument("-o", 0);
     if (cmdline.HasSwitch("-pcond")) printcond = true;
@@ -166,7 +164,13 @@ int main(int argc, char *argv[]){
        	p.alpha_prior[3] = atof(cmdline.GetArgument("-prior", 3).c_str());
        	p.alpha_prior[4] = atof(cmdline.GetArgument("-prior", 4).c_str());
       }
+    if (cmdline.HasSwitch("-all-input")){
+        for (int i =0; i < cmdline.GetArgumentCount("-all-input"); i++){
+            p.multiple_regions.push_back(cmdline.GetArgument("-all-input",i));
+            cout << "Adding region file " << cmdline.GetArgument("-all-input",i) << endl;
+        }
 
+    }
 
       //random number generator
     const gsl_rng_type * T;

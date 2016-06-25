@@ -17,6 +17,7 @@ Fgwas_params::Fgwas_params(){
 	dannot.clear();
 	distmodels.clear();
 	segannot.clear();
+    multiple_regions.clear();
 	outstem = "gwas-pw";
 	dropchr = false;
 	cc = false;

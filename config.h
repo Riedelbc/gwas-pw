@@ -31,9 +31,6 @@
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "gwas-pw"
 
-/* Define to the home page for this package. */
-#define PACKAGE_URL "https://github.com/joepickrell/gwas-pw"
-
 /* Define to the version of this package. */
 #define PACKAGE_VERSION "0.02"
 

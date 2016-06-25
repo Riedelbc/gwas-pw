@@ -1,0 +1,325 @@
+gzstream.o: gzstream.cpp gzstream.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/iostream \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/c++config.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/os_defines.h \
+ /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/cpu_defines.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ostream \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ios \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/iosfwd \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stringfwd.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/memoryfwd.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/postypes.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/cwchar \
+ /usr/include/wchar.h /usr/include/stdio.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/stdarg.h \
+ /usr/include/bits/wchar.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/stddef.h \
+ /usr/include/xlocale.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/exception \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/atomic_lockfree_defines.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/char_traits.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_algobase.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/functexcept.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/exception_defines.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/cpp_type_traits.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ext/type_traits.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ext/numeric_traits.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_pair.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/move.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/concept_check.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_iterator_base_types.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_iterator_base_funcs.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/debug/debug.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_iterator.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/localefwd.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/c++locale.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/clocale \
+ /usr/include/locale.h /usr/include/bits/locale.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/cctype \
+ /usr/include/ctype.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/ios_base.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ext/atomicity.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/gthr.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/gthr-default.h \
+ /usr/include/pthread.h /usr/include/sched.h /usr/include/time.h \
+ /usr/include/bits/sched.h /usr/include/bits/time.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/bits/setjmp.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/atomic_word.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/locale_classes.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/string \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/allocator.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/c++allocator.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ext/new_allocator.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/new \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/ostream_insert.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/cxxabi_forced.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_function.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/backward/binders.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/range_access.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/basic_string.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/basic_string.tcc \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/locale_classes.tcc \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/streambuf \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/streambuf.tcc \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/basic_ios.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/locale_facets.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/cwctype \
+ /usr/include/wctype.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/ctype_base.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/streambuf_iterator.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/ctype_inline.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/locale_facets.tcc \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/basic_ios.tcc \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/ostream.tcc \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/istream \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/istream.tcc \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/fstream \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/codecvt.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/cstdio \
+ /usr/include/libio.h /usr/include/_G_config.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/bits/stdio.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/basic_file.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/c++io.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/fstream.tcc \
+ /usr/include/zlib.h /usr/include/zconf.h /usr/include/sys/types.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/sys/sysmacros.h \
+ /usr/include/unistd.h /usr/include/bits/posix_opt.h \
+ /usr/include/bits/environments.h /usr/include/bits/confname.h \
+ /usr/include/getopt.h /usr/include/string.h
+
+gzstream.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/iostream:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/c++config.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/os_defines.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/cpu_defines.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ostream:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ios:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/iosfwd:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stringfwd.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/memoryfwd.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/postypes.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/cwchar:
+
+/usr/include/wchar.h:
+
+/usr/include/stdio.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/stdarg.h:
+
+/usr/include/bits/wchar.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/stddef.h:
+
+/usr/include/xlocale.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/exception:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/atomic_lockfree_defines.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/char_traits.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_algobase.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/functexcept.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/exception_defines.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/cpp_type_traits.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ext/type_traits.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ext/numeric_traits.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_pair.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/move.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/concept_check.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_iterator_base_types.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_iterator_base_funcs.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/debug/debug.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_iterator.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/localefwd.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/c++locale.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/clocale:
+
+/usr/include/locale.h:
+
+/usr/include/bits/locale.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/cctype:
+
+/usr/include/ctype.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/typesizes.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/bits/byteswap.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/ios_base.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ext/atomicity.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/gthr.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/gthr-default.h:
+
+/usr/include/pthread.h:
+
+/usr/include/sched.h:
+
+/usr/include/time.h:
+
+/usr/include/bits/sched.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/bits/setjmp.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/atomic_word.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/locale_classes.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/string:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/allocator.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/c++allocator.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/ext/new_allocator.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/new:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/ostream_insert.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/cxxabi_forced.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_function.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/backward/binders.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/range_access.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/basic_string.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/basic_string.tcc:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/locale_classes.tcc:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/streambuf:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/streambuf.tcc:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/basic_ios.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/locale_facets.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/cwctype:
+
+/usr/include/wctype.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/ctype_base.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/streambuf_iterator.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/ctype_inline.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/locale_facets.tcc:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/basic_ios.tcc:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/ostream.tcc:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/istream:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/istream.tcc:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/fstream:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/codecvt.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/cstdio:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/basic_file.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/x86_64-unknown-linux-gnu/bits/c++io.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/fstream.tcc:
+
+/usr/include/zlib.h:
+
+/usr/include/zconf.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/bits/select.h:
+
+/usr/include/bits/sigset.h:
+
+/usr/include/sys/sysmacros.h:
+
+/usr/include/unistd.h:
+
+/usr/include/bits/posix_opt.h:
+
+/usr/include/bits/environments.h:
+
+/usr/include/bits/confname.h:
+
+/usr/include/getopt.h:
+
+/usr/include/string.h:

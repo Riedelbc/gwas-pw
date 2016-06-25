@@ -38,8 +38,8 @@ public:
 	vector<double> segpriors;
 	void init_segpriors();
 	void set_segpriors();
-
 	//funtions for working with distance annotations
+    void SNPs_PW::make_segments2( int, Fgwas_params *);
 	void append_dannotnames(string, vector<pair<int, int> >);
 	vector<pair<int, int> > read_dmodel(string);
 

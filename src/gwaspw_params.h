@@ -42,7 +42,7 @@ public:
 	string infile, outstem, ldfile;
 	bool cc;
 	//annotation lists
-	vector<string> wannot, dannot, distmodels, segannot;
+	vector<string> wannot, dannot, distmodels, segannot, multiple_regions;
 	double loquant, hiquant;
 
 	//drop chromosomes
