@@ -25,7 +25,7 @@ void printopts(){
         cout << "-k [integer] block size in number of SNPs (5000)\n";
         cout << "-cor [float] expected correlation in summary statistics under the null [0]\n";
         cout << "-all-input [filename/s] eQTL input files for cis-ome analysis. \n" << endl;
-        cout << "-m [integer] minimum SNP-sized block" << endl; 
+        cout << "-m [integer] minimum SNP-sized block (50)" << endl; 
         //cout << "-dists [string:string] the name of the distance annotation(s) and the file(s) containing the distance model(s)\n";
         //cout << "-nburn [integer] iterations of burn-in (5000)\n";
         //cout << "-nsamp [integer] iterations of sampling (50000)\n";
@@ -170,6 +170,9 @@ int main(int argc, char *argv[]){
             cout << "Adding region file " << cmdline.GetArgument("-all-input",i) << endl;
         }
 
+    }
+    if (cmdline.HasSwitch("-m")){
+        p.min_window_size = atoi(cmdline.GetArgument("-m",0).c_str());
     }
 
       //random number generator

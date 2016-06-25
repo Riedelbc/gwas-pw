@@ -32,6 +32,7 @@ Fgwas_params::Fgwas_params(){
 	pheno2 = "NA";
 	burnin = 3000;
 	nsamp = 30000;
+    min_window_size = 50;
 	overlap = false;
 	sampfreq = 10;
 	rev = false;

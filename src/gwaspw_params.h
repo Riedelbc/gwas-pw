@@ -44,6 +44,9 @@ public:
 	//annotation lists
 	vector<string> wannot, dannot, distmodels, segannot, multiple_regions;
 	double loquant, hiquant;
+    
+    // minimum window size
+    int min_window_size;
 
 	//drop chromosomes
 	bool dropchr;
