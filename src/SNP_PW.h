@@ -24,9 +24,10 @@ using namespace std;
 class SNP_PW{
 public:
 	SNP_PW();
-	SNP_PW(string, string, int, double, double, double, double, vector<bool>, vector<int>, vector<vector<pair<int, int> > >, vector<double>, double); //for pairwise
+	SNP_PW(string, string, int, double, double, double, double, vector<bool>, vector<int>, vector<vector<pair<int, int> > >, vector<double>, double, string); //for pairwise
 	string id;
 	string chr;
+    string infile;
 	int pos;
 
 	double Z1; // Z-score
