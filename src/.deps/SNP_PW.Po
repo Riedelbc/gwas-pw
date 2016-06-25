@@ -120,9 +120,16 @@ SNP_PW.o: SNP_PW.cpp SNP_PW.h \
  /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_heap.h \
  /hpc/packages/minerva-common/gcc/4.8.2/include/c++/4.8.2/bits/stl_tempbuf.h \
  /usr/include/sys/stat.h /usr/include/bits/stat.h gzstream.h \
- /usr/include/zlib.h /usr/include/zconf.h /usr/include/unistd.h \
- /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
- /usr/include/bits/confname.h /usr/include/getopt.h \
+ /hpc/packages/minerva-common/zlib/1.2.8/include/zlib.h \
+ /hpc/packages/minerva-common/zlib/1.2.8/include/zconf.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/limits.h \
+ /hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/syslimits.h \
+ /usr/include/limits.h /usr/include/bits/posix1_lim.h \
+ /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
+ /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
+ /usr/include/unistd.h /usr/include/bits/posix_opt.h \
+ /usr/include/bits/environments.h /usr/include/bits/confname.h \
+ /usr/include/getopt.h \
  /hpc/packages/minerva-common/gsl/1.16/include/gsl/gsl_matrix.h \
  /hpc/packages/minerva-common/gsl/1.16/include/gsl/gsl_matrix_complex_long_double.h \
  /hpc/packages/minerva-common/gsl/1.16/include/gsl/gsl_types.h \
@@ -179,11 +186,6 @@ SNP_PW.o: SNP_PW.cpp SNP_PW.h \
  /hpc/packages/minerva-common/gsl/1.16/include/gsl/gsl_math.h \
  /hpc/packages/minerva-common/gsl/1.16/include/gsl/gsl_sys.h \
  /hpc/packages/minerva-common/gsl/1.16/include/gsl/gsl_machine.h \
- /hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/limits.h \
- /hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/syslimits.h \
- /usr/include/limits.h /usr/include/bits/posix1_lim.h \
- /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
- /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
  /hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/float.h \
  /hpc/packages/minerva-common/gsl/1.16/include/gsl/gsl_precision.h \
  /hpc/packages/minerva-common/gsl/1.16/include/gsl/gsl_nan.h \
@@ -910,9 +912,25 @@ SNP_PW.h:
 
 gzstream.h:
 
-/usr/include/zlib.h:
+/hpc/packages/minerva-common/zlib/1.2.8/include/zlib.h:
 
-/usr/include/zconf.h:
+/hpc/packages/minerva-common/zlib/1.2.8/include/zconf.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/limits.h:
+
+/hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/bits/posix1_lim.h:
+
+/usr/include/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/bits/posix2_lim.h:
+
+/usr/include/bits/xopen_lim.h:
 
 /usr/include/unistd.h:
 
@@ -1041,22 +1059,6 @@ gzstream.h:
 /hpc/packages/minerva-common/gsl/1.16/include/gsl/gsl_sys.h:
 
 /hpc/packages/minerva-common/gsl/1.16/include/gsl/gsl_machine.h:
-
-/hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/limits.h:
-
-/hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include-fixed/syslimits.h:
-
-/usr/include/limits.h:
-
-/usr/include/bits/posix1_lim.h:
-
-/usr/include/bits/local_lim.h:
-
-/usr/include/linux/limits.h:
-
-/usr/include/bits/posix2_lim.h:
-
-/usr/include/bits/xopen_lim.h:
 
 /hpc/packages/minerva-common/gcc/4.8.2/lib/gcc/x86_64-unknown-linux-gnu/4.8.2/include/float.h:
 
