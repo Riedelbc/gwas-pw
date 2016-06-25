@@ -56,6 +56,8 @@ public:
 	vector<vector<double> > seg_toadd; //contains the relative likelihoods for all 4 models
 	bool precomputed;
 
+     
+
 	//MCMC
 	void MCMC(gsl_rng *);
 	int MCMC_update(gsl_rng *);

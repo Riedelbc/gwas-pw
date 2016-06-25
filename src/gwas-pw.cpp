@@ -12,8 +12,8 @@ using namespace std;
 
 
 void printopts(){
-        cout << "\ngwas-pw v0.21\n";
-        cout << "by Joe Pickrell (jkpickrell@nygenome.org)\n\n";
+        cout << "\ngwas-pw GWAS/eqtl v0.21\n";
+        cout << "by Joe Pickrell (jkpickrell@nygenome.org), eQTL mode added by James Boocock and Claudia Giambartolomei\n\n";
         cout << "-i [file name] input file w/ Z-scores, variances in beta estimates\n";
         cout << "-phenos [string] [string] names of the phenotypes\n";
         cout << "-o [string] stem for names of output files\n";
@@ -96,74 +96,74 @@ int main(int argc, char *argv[]){
      	p.pheno2 = cmdline.GetArgument("-phenos", 1);
      }
     else{
-    	cerr << "ERROR: missing phenotypes (-pheno)\n";
+        cerr << "ERROR: missing phenotypes (-pheno)\n";
         printopts();
         exit(1);
     }
     /*
-    if (cmdline.HasSwitch("-w")){
-    	vector<string> strs;
-    	string s = cmdline.GetArgument("-w", 0);
-    	boost::split(strs, s ,boost::is_any_of("+"));
-    	for (int i  = 0; i < strs.size(); i++) {
-    		p.wannot.push_back( strs[i] );
-    	}
-    }
-    if (cmdline.HasSwitch("-dists")){
-     	vector<string> strs;
-     	string s = cmdline.GetArgument("-dists", 0);
-     	boost::split(strs, s ,boost::is_any_of("+"));
-     	for (int i  = 0; i < strs.size(); i++) {
-     		vector<string> strs2;
-     		boost::split(strs2, strs[i], boost::is_any_of(":"));
-     		p.dannot.push_back( strs2[0] );
-     		p.distmodels.push_back(strs2[1]);
-     	}
-     }
-    if (cmdline.HasSwitch("-drop")){
-    	p.dropchr = true;
-    	string s = cmdline.GetArgument("-drop", 0);
-    	p.chrtodrop = s;
-    }
+       if (cmdline.HasSwitch("-w")){
+       vector<string> strs;
+       string s = cmdline.GetArgument("-w", 0);
+       boost::split(strs, s ,boost::is_any_of("+"));
+       for (int i  = 0; i < strs.size(); i++) {
+       p.wannot.push_back( strs[i] );
+       }
+       }
+       if (cmdline.HasSwitch("-dists")){
+       vector<string> strs;
+       string s = cmdline.GetArgument("-dists", 0);
+       boost::split(strs, s ,boost::is_any_of("+"));
+       for (int i  = 0; i < strs.size(); i++) {
+       vector<string> strs2;
+       boost::split(strs2, strs[i], boost::is_any_of(":"));
+       p.dannot.push_back( strs2[0] );
+       p.distmodels.push_back(strs2[1]);
+       }
+       }
+       if (cmdline.HasSwitch("-drop")){
+       p.dropchr = true;
+       string s = cmdline.GetArgument("-drop", 0);
+       p.chrtodrop = s;
+       }
 
 
-    if (cmdline.HasSwitch("-dens")) {
-    	p.segannot.push_back(cmdline.GetArgument("-dens", 0));
-    	p.loquant = atof(cmdline.GetArgument("-dens", 1).c_str());
-    	p.hiquant = atof(cmdline.GetArgument("-dens", 2).c_str());
-    }
-    */
+       if (cmdline.HasSwitch("-dens")) {
+       p.segannot.push_back(cmdline.GetArgument("-dens", 0));
+       p.loquant = atof(cmdline.GetArgument("-dens", 1).c_str());
+       p.hiquant = atof(cmdline.GetArgument("-dens", 2).c_str());
+       }
+       */
     if (cmdline.HasSwitch("-fine")) p.finemap = true;
     if (cmdline.HasSwitch("-mcmc")) p.MCMC = true;
     if (cmdline.HasSwitch("-seed")){
-    	p.seed = atoi(cmdline.GetArgument("-seed", 0).c_str());
+        p.seed = atoi(cmdline.GetArgument("-seed", 0).c_str());
     }
     else p.seed = unsigned( time(NULL));
     if (cmdline.HasSwitch("-nburn")){
-     	p.burnin = atoi(cmdline.GetArgument("-nburn", 0).c_str());
+        p.burnin = atoi(cmdline.GetArgument("-nburn", 0).c_str());
     }
     if (cmdline.HasSwitch("-nsamp")){
-      	p.nsamp = atoi(cmdline.GetArgument("-nsamp", 0).c_str());
-     }
+        p.nsamp = atoi(cmdline.GetArgument("-nsamp", 0).c_str());
+    }
     if (cmdline.HasSwitch("-jumpsd")){
-      	p.MCMC_gauss_SD = atof(cmdline.GetArgument("-jumpsd", 0).c_str());
-     }
+        p.MCMC_gauss_SD = atof(cmdline.GetArgument("-jumpsd", 0).c_str());
+    }
     if (cmdline.HasSwitch("-cor")){
-        	p.cor = atof(cmdline.GetArgument("-cor", 0).c_str());
-        	//p.overlap = true;
-       }
+        p.cor = atof(cmdline.GetArgument("-cor", 0).c_str());
+        //p.overlap = true;
+    }
     if (cmdline.HasSwitch("-prior")){
-    	if (cmdline.GetArgumentCount("-prior") != 5) {
-    		cerr << "ERROR: -prior needs 5 entries, "<< cmdline.GetArgumentCount("-prior") << " given\n";
-    		exit(1);
-    	}
+        if (cmdline.GetArgumentCount("-prior") != 5) {
+            cerr << "ERROR: -prior needs 5 entries, "<< cmdline.GetArgumentCount("-prior") << " given\n";
+            exit(1);
+        }
 
-       	p.alpha_prior[0] = atof(cmdline.GetArgument("-prior", 0).c_str());
-       	p.alpha_prior[1] = atof(cmdline.GetArgument("-prior", 1).c_str());
-       	p.alpha_prior[2] = atof(cmdline.GetArgument("-prior", 2).c_str());
-       	p.alpha_prior[3] = atof(cmdline.GetArgument("-prior", 3).c_str());
-       	p.alpha_prior[4] = atof(cmdline.GetArgument("-prior", 4).c_str());
-      }
+        p.alpha_prior[0] = atof(cmdline.GetArgument("-prior", 0).c_str());
+        p.alpha_prior[1] = atof(cmdline.GetArgument("-prior", 1).c_str());
+        p.alpha_prior[2] = atof(cmdline.GetArgument("-prior", 2).c_str());
+        p.alpha_prior[3] = atof(cmdline.GetArgument("-prior", 3).c_str());
+        p.alpha_prior[4] = atof(cmdline.GetArgument("-prior", 4).c_str());
+    }
     if (cmdline.HasSwitch("-all-input")){
         for (int i =0; i < cmdline.GetArgumentCount("-all-input"); i++){
             p.multiple_regions.push_back(cmdline.GetArgument("-all-input",i));
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]){
         p.min_window_size = atoi(cmdline.GetArgument("-m",0).c_str());
     }
 
-      //random number generator
+    //random number generator
     const gsl_rng_type * T;
     gsl_rng * r;
     gsl_rng_env_setup();

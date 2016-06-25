@@ -187,7 +187,7 @@ void SNPs_PW::make_segments(string bedfile){
         int intervalindex = 0;
         while (j < chromosome.second){
             int jpos = d[j].pos;
-
+            cerr << "current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
             if (jpos < currentseg.first){
                 //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here1\n";
                 cerr << "ERROR: current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
