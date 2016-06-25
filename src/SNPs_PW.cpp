@@ -846,7 +846,7 @@ void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){
         int intervalindex = 0;
         while (j < chromosome.second){
             int jpos = d[j].pos;
-            cout << "current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << " file = " << d[j].infile "\n";
+            cout << "current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << " file = " << d[j].infile << endl;
             if (jpos < currentseg.first){
                 //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here1\n";
                 cerr << "ERROR: current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
