@@ -479,7 +479,7 @@ void SNPs_PW::load_snps_pw(string infile, vector<string> annot, vector<string> d
             dists.push_back( atoi(line[*it].c_str()));
         }
 
-        SNP_PW s(rs, chr , pos, Z1, Z2, V1, V2, an, dists, dmodels, params->V, params->cor);
+        SNP_PW s(rs, chr , pos, Z1, Z2, V1, V2, an, dists, dmodels, params->V, params->cor, infile);
         if (params->finemap || params->numberedseg){
             int snumber = atoi(line[segnumberindex].c_str());
             s.chunknumber = snumber;
@@ -824,8 +824,7 @@ void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){
     segments.clear();
     vector<string> input_filenames;
     for (vector<string>::iterator it = p->multiple_regions.begin(); it != p->multiple_regions.end(); ++it){
-        cout << *it; 
-        cout << p->infile << endl; 
+        cout << *it << endl;; 
         load_snps_pw(*it, params->wannot, params->dannot, params->segannot);
         make_chrsegments();
         input_filenames.push_back(*it);
@@ -847,7 +846,7 @@ void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){
         int intervalindex = 0;
         while (j < chromosome.second){
             int jpos = d[j].pos;
-
+            cout << "current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << " file = " << d[j].infile "\n";
             if (jpos < currentseg.first){
                 //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here1\n";
                 cerr << "ERROR: current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
@@ -863,7 +862,6 @@ void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){
                 currentseg = intervals[intervalindex];
             }
             else if (jpos >=currentseg.first and jpos < currentseg.second) {
-                cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here3\n";
                 j = j+1;
             }
             else if (jpos >= currentseg.second and j != start){

@@ -11,7 +11,7 @@ SNP_PW::SNP_PW(){
 
 
 
-SNP_PW::SNP_PW(string rs, string c, int p, double Z, double ZZ, double V, double VV, vector<bool> an, vector<int> ds, vector<vector<pair<int, int> > > dmodels, vector<double> prior, double cor){
+SNP_PW::SNP_PW(string rs, string c, int p, double Z, double ZZ, double V, double VV, vector<bool> an, vector<int> ds, vector<vector<pair<int, int> > > dmodels, vector<double> prior, double cor, string infile){
 	//for pairwise
 	id = rs;
 	chr = c;
@@ -20,6 +20,7 @@ SNP_PW::SNP_PW(string rs, string c, int p, double Z, double ZZ, double V, double
 	Z2 = ZZ;
 	V1 = V;
 	V2 = VV;
+    infile = infile;
 	W.clear();
 	for (vector<double>::iterator it = prior.begin(); it != prior.end(); it++) W.push_back(*it);
 
