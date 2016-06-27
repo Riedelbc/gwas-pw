@@ -723,7 +723,7 @@ void SNPs_PW::print(string outfile, string outfile2){
     for (vector<pair<int, int> >::iterator it = segments.begin(); it != segments.end(); it++){
         int stindex = it->first;
         int spindex = it->second;
-        out2 << segnum << " " << spindex-stindex << " "<< d[stindex].chr << " "<< d[stindex].pos << " "<< d[spindex-1].pos << " ";
+        out2 << segnum << " " << spindex-stindex << " "<< d[stindex].chr << " "<< d[stindex].pos << " "<< d[spindex-1].pos << " " << d[stindex].infile;
         vector<double> segbfs = get_segbfs(segnum);
         if (params->finemap){
             double tmp = segbfs[0];
@@ -766,7 +766,7 @@ void SNPs_PW::print(string outfile, string outfile2){
         for (int i = 0; i < nsegannot; i++) out2 << " "<< segannot[segnum][i];
         out2 << "\n";
         for (int i =stindex ; i < spindex; i++){
-            out << d[i].id << " "<< d[i].chr << " "<< d[i].pos << " "<< d[i].BF1 << " "<< d[i].BF2 << " " << d[i].BF3<< " "<< d[i].Z1 <<  " " << d[i].V1 << " "<< d[i].Z2 <<  " " << d[i].V2<< " "<< snppri[i][0]<< " "<< snppri[i][1]<< " "<< snppri[i][2] << " " << exp(d[i].BF1- sumlbf1) << " "<< exp(d[i].BF2- sumlbf2) << " "<< exp(d[i].BF3- sumlbf3) << " "<< segnum;
+            out << d[i].id << " "<< d[i].chr << " "<< d[i].pos << " "<< d[i].BF1 << " "<< d[i].BF2 << " " << d[i].BF3<< " "<< d[i].Z1 <<  " " << d[i].V1 << " "<< d[i].Z2 <<  " " << d[i].V2<< " "<< snppri[i][0]<< " "<< snppri[i][1]<< " "<< snppri[i][2] << " " << exp(d[i].BF1- sumlbf1) << " "<< exp(d[i].BF2- sumlbf2) << " "<< exp(d[i].BF3- sumlbf3) << " "<< segnum << " " << d[i].infile;
             for (int j = 0; j < annotnames.size(); j++) out << " "<< d[i].annot[j];
             out << "\n";
         }
