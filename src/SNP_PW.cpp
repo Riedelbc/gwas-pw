@@ -11,7 +11,7 @@ SNP_PW::SNP_PW(){
 
 
 
-SNP_PW::SNP_PW(string rs, string c, int p, double Z, double ZZ, double V, double VV, vector<bool> an, vector<int> ds, vector<vector<pair<int, int> > > dmodels, vector<double> prior, double cor, string infile){
+SNP_PW::SNP_PW(string rs, string c, int p, double Z, double ZZ, double V, double VV, vector<bool> an, vector<int> ds, vector<vector<pair<int, int> > > dmodels, vector<double> prior, double cor, string infile_d){
 	//for pairwise
 	id = rs;
 	chr = c;
@@ -20,7 +20,7 @@ SNP_PW::SNP_PW(string rs, string c, int p, double Z, double ZZ, double V, double
 	Z2 = ZZ;
 	V1 = V;
 	V2 = VV;
-    infile = infile;
+    infile = infile_d;
 	W.clear();
 	for (vector<double>::iterator it = prior.begin(); it != prior.end(); it++) W.push_back(*it);
 
@@ -124,8 +124,10 @@ double SNP_PW::calc_logBF1_ind(double C, double WW){
 double SNP_PW::calc_logBF1(double C){
 	double toreturn = calc_logBF1_ind(C, W[0]);
 	if (W.size() >1){
-		for (int i = 1; i < W.size(); i++) toreturn  = sumlog(toreturn, calc_logBF1_ind(C, W[i]));
-	}
+		for (int i = 1; i < W.size(); i++) {
+            toreturn  = sumlog(toreturn, calc_logBF1_ind(C, W[i]));
+        }
+        }
 	toreturn = toreturn - log(W.size());
 	return toreturn;
 }

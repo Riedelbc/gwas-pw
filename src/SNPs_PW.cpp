@@ -14,8 +14,8 @@ SNPs_PW::SNPs_PW(){
 
 
 SNPs_PW::SNPs_PW(Fgwas_params *p){
-	params = p;
-	params->print_stdout();
+    params = p;
+    params->print_stdout();
 	precomputed = false;
 	//read distance models
 	for (vector<string>::iterator it = params->distmodels.begin(); it != params->distmodels.end(); it++) dmodels.push_back( read_dmodel(*it));
@@ -713,8 +713,8 @@ void SNPs_PW::print(){
 void SNPs_PW::print(string outfile, string outfile2){
     ogzstream out(outfile.c_str());
     ogzstream out2(outfile2.c_str());
-    out << "id chr pos logBF_1 logBF_2 logBF_3 Z_"<< params->pheno1<<" V_"<<params->pheno1<<" Z_"<< params->pheno2 << " V_"<<params->pheno2<<" pi_1 pi_2 pi_3 PPA_1 PPA_2 PPA_3 chunk";
-    out2 << "chunk NSNP chr st sp max_abs_Z_"<< params->pheno1<<" max_abs_Z_"<<params->pheno2<<" logBF_1 logBF_2 logBF_3 logBF_4 pi_1 pi_2 pi_3 pi_4 PPA_1 PPA_2 PPA_3 PPA_4";
+    out << "id chr pos logBF_1 logBF_2 logBF_3 Z_"<< params->pheno1<<" V_"<<params->pheno1<<" Z_"<< params->pheno2 << " V_"<<params->pheno2<<" pi_1 pi_2 pi_3 PPA_1 PPA_2 PPA_3 chunk file_name";
+    out2 << "chunk NSNP chr st sp max_abs_Z_"<< params->pheno1<<" max_abs_Z_"<<params->pheno2<<" logBF_1 logBF_2 logBF_3 logBF_4 pi_1 pi_2 pi_3 pi_4 PPA_1 PPA_2 PPA_3 PPA_4 file_name";
     for (vector<string>::iterator it = annotnames.begin(); it != annotnames.end(); it++) out << " "<< *it;
     out << "\n";
     for (vector<string>::iterator it = segannotnames.begin(); it != segannotnames.end(); it++) out2 << " "<< *it;
@@ -723,7 +723,7 @@ void SNPs_PW::print(string outfile, string outfile2){
     for (vector<pair<int, int> >::iterator it = segments.begin(); it != segments.end(); it++){
         int stindex = it->first;
         int spindex = it->second;
-        out2 << segnum << " " << spindex-stindex << " "<< d[stindex].chr << " "<< d[stindex].pos << " "<< d[spindex-1].pos << " " << d[stindex].infile;
+        out2 << segnum << " " << spindex-stindex << " "<< d[stindex].chr << " "<< d[stindex].pos << " "<< d[spindex-1].pos << " ";
         vector<double> segbfs = get_segbfs(segnum);
         if (params->finemap){
             double tmp = segbfs[0];
@@ -762,7 +762,7 @@ void SNPs_PW::print(string outfile, string outfile2){
             segPPA.push_back(exp(num - denom));
         }
 
-        out2 << maxZ1<< " "<< maxZ2<< " "<< segbfs[0] <<" "<< segbfs[1]<< " "<< segbfs[2]<< " "<< segbfs[3] << " " << pi[1]<< " "<< pi[2]<< " "<< pi[3]<< " "<< pi[4] << " "<< segPPA[0]<< " "<< segPPA[1]<< " "<< segPPA[2]<< " "<< segPPA[3];
+        out2 << maxZ1<< " "<< maxZ2<< " "<< segbfs[0] <<" "<< segbfs[1]<< " "<< segbfs[2]<< " "<< segbfs[3] << " " << pi[1]<< " "<< pi[2]<< " "<< pi[3]<< " "<< pi[4] << " "<< segPPA[0]<< " "<< segPPA[1]<< " "<< segPPA[2]<< " "<< segPPA[3] << " " <<  d[stindex].infile;
         for (int i = 0; i < nsegannot; i++) out2 << " "<< segannot[segnum][i];
         out2 << "\n";
         for (int i =stindex ; i < spindex; i++){
@@ -846,7 +846,6 @@ void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){
         int intervalindex = 0;
         while (j < chromosome.second){
             int jpos = d[j].pos;
-            cout << "current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << " file = " << d[j].infile << endl;
             if (jpos < currentseg.first){
                 //cout<< jpos << " "<< currentseg.first << " "<< currentseg.second << " here1\n";
                 cerr << "ERROR: current segment is "<< currentseg.first << " "<< currentseg.second << ", position is "<< jpos << "\n";
@@ -870,7 +869,7 @@ void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){
                 // If the current segment does not contain many SNPS remove it.
                 //
                 if ((j - start) < p->min_window_size){
-                    cerr << "Removing window because it does not contain any SNPs." << endl;
+                    cerr << "Removing window because it does not contain enough SNPs. window = " << d[j-1].infile << endl;
                 }else{
                 segments.push_back(make_pair(start, j));
                 }
@@ -891,7 +890,7 @@ void SNPs_PW::make_segments3(int size, Fgwas_params *p, string bedfile){
 
         }
         if ((j - start) < p->min_window_size){
-            cerr << "Removing window as it does not contain enough SNPS" << endl;
+            cerr << "Removing window as it does not contain enough SNPS. window = " << d[j-1].infile << endl;
         }else{
         //cout << start << " "<< j << " done adding\n";
         segments.push_back(make_pair(start, j));
