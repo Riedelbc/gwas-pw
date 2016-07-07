@@ -1144,7 +1144,7 @@ void SNPs::set_priors_cond(int which){
 double SNPs_PW::llk(){
 	if (!precomputed) seg_toadd.clear();
 	double toreturn = -1000;
-	for (int i = 0; i < segments.size(); i++) toreturn += llk(i);
+	for (int i = 0; i < segments.size(); i++) toreturn = sumlog(to_return, llk(i));
 	data_llk = toreturn;
 	if (!precomputed) precomputed = true;
 
