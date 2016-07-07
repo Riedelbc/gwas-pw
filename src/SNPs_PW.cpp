@@ -1029,9 +1029,10 @@ void SNPs_PW::print_chrsegments(){
 
 
 void SNPs_PW::set_priors(){
-
+    cout << " DO we get to this ??? " << endl;
 	set_segpriors(); // right now only segment priors, constant across segments
-	for (int i = 0; i < segments.size(); i++) set_priors(i);
+	//for (int i = 0; i < segments.size(); i++) set_priors(i);
+    cout << "This far ?? " << endl;
 }
 
 
@@ -1045,7 +1046,11 @@ void SNPs::set_priors_cond(){
 
 void SNPs_PW::set_segpriors(){
 	// 5 models, prior on model i = exp(a_i)/ sum_j(exp)a_j))
-	assert (alpha.size()==5);
+    cout << "Make it here " << endl;
+    if (alpha.size() > 4){
+    alpha.erase(alpha.begin() + 4);
+    }
+	assert (alpha.size()==4);
 	vector<double> segp;
 	double s = 0;
 	int sti = 0;
@@ -1055,8 +1060,10 @@ void SNPs_PW::set_segpriors(){
 		segp.push_back(exp(alpha[i]));
 		s+= exp(alpha[i]);
 	}
-	for (int i = sti; i < alpha.size(); i++) pi[i] = segp[i-sti]/s;
-
+	for (int i = sti; i < alpha.size(); i++){
+        pi[i] = segp[i-sti]/s;
+    }
+    pi[0] = 1 - pi[1] - pi[2] - pi[2]*pi[1] - pi[3]; 
 	//for (int i = 0; i < pi.size(); i++){
 	//		cout << pi[i] << " ok\n";
 	//}
@@ -1143,8 +1150,8 @@ double SNPs_PW::llk(){
 
 	// add on prior on proportions (for MAP estimator)
 	// this is primarily for numerical stability
-	double pi_lk = lnvecdens(alpha, params->alpha_prior);
-	toreturn = toreturn+pi_lk;
+	//double pi_lk 
+	toreturn = toreturn;
 	return toreturn;
 }
 
@@ -1243,12 +1250,11 @@ double SNPs_PW::llk(int which){
 		double m3 = seg_toadd.at(which).at(2);
 		double m4 = seg_toadd.at(which).at(3);
 
-
 		m1 = m1+log(pi[1]);
 		m2 = m2+log(pi[2]);
 		m3 = m3+log(pi[3]);
-		m4 = m4+log(pi[4]);
-
+		m4 = m4+log(pi[1] * pi[2]);
+        //cout << pi[4] << endl;
 		if (params->finemap){
 			double tmp = 1+ exp(m1-m3)+exp(m2-m3)+exp(m4-m3);
 			toreturn = m3+log(tmp);
@@ -1259,6 +1265,7 @@ double SNPs_PW::llk(int which){
 		double tmp = 1+exp(m0-m3)+ exp(m1-m3)+exp(m2-m3)+exp(m4-m3);
 		toreturn = m3+log(tmp);
 		//cout << m0 << " "<< m1 << " "<< m2 << " "<< m3 << " "<< m4 << " " << toreturn << "\n";
+        //cout << pi[0] << " " << pi[1] << " " << pi[2] << " " << pi[3] << endl;
 		return toreturn;
 	}
 	pair<int, int> seg = segments[which];
@@ -1271,23 +1278,22 @@ double SNPs_PW::llk(int which){
 	double m3 = -1000;
 	double m4 = -1000;
 
-
 	//int counter = 0;
 	// if these are non-overlapping cohorts
 	if (!params->overlap){
 		for (int i = st; i < sp ; i++){
 
 			//term 1: one associated SNP for pheno 1
-			double tmp2add1 = snppri.at(i).at(0)+ d[i].BF1;
+			double tmp2add1 = d[i].BF1;
 			m1 = sumlog(m1, tmp2add1);
 
 
 			//term 2: one associated SNP for pheno 2
-			double tmp2add2 = snppri.at(i).at(1)+ d[i].BF2;
+			double tmp2add2 = d[i].BF2;
 			m2 = sumlog(m2, tmp2add2);
 
 			//term 3: one associated SNP, both phenos
-			double tmp2add3 = snppri.at(i).at(2)+ d[i].BF3;
+			double tmp2add3 = d[i].BF3;
 			m3 = sumlog(m3, tmp2add3);
 
 			//term 4: two associated SNPs, both phenos
@@ -1295,80 +1301,9 @@ double SNPs_PW::llk(int which){
 			for (int j = i+1; j < sp ; j++){
 
 
-				double tmp2_4 = snppri.at(i).at(0)+snppri.at(j).at(1)+d[i].BF1+d[j].BF2;
-				double tmp2_42 = snppri.at(i).at(1)+snppri.at(j).at(0)+d[j].BF1+d[i].BF2;
+				double tmp2_4 = d[i].BF1+d[j].BF2;
+				double tmp2_42 = d[j].BF1+d[i].BF2;
 				//cout << d[i].id << " "<< d[j].id << " "<< tmp2_4 << " "<< d[i].BF1+d[j].BF2 << " "<< tmp2_42 <<  " "<< d[j].BF1+d[i].BF2 << "\n";
-				tmp2add4 = sumlog(tmp2add4, tmp2_4);
-
-				tmp2add4 = sumlog(tmp2add4, tmp2_42);
-
-			}
-			m4 = sumlog(m4, tmp2add4);
-		}
-	}
-	else{
-		vector<int> poss;
-		for (int i = st; i < sp ; i++) {
-			//cout << d[i].pos << "\n";
-			poss.push_back(d[i].pos);
-		}
-		//cout << "readld\n"; cout.flush();
-		LDmatrix ld(params->ldfile, d[st].chr, poss, params->Nhap);
-		//cout << "done\n"; cout.flush();
-		for (int i = st; i < sp ; i++){
-
-			//term 1: one associated SNP for pheno 1
-			double tmp2add1 = snppri.at(i).at(0)+ d[i].BF1;
-			m1 = sumlog(m1, tmp2add1);
-
-
-			//term 2: one associated SNP for pheno 2
-			double tmp2add2 = snppri.at(i).at(1)+ d[i].BF2;
-			m2 = sumlog(m2, tmp2add2);
-
-			//term 3: one associated SNP, both phenos
-			double tmp2add3 = snppri.at(i).at(2)+ d[i].BF3;
-			m3 = sumlog(m3, tmp2add3);
-
-			//term 4: two associated SNPs, both phenos
-			double tmp2add4 = -10000;
-			for (int j = i+1; j < sp ; j++){
-				//double D = ld.get_ld(d[i].pos, d[j].pos);
-				double tmpVi = ld.get_ld(d[i].pos, d[i].pos);
-				double tmpVj = ld.get_ld(d[j].pos, d[j].pos);
-
-				double  VarR_i = tmpVi/tmpVj; //this is pi (1-pi) / (pj(1-pj))
-				double VarR_j = tmpVj/tmpVi; //this is pj (1-pj)/ (pi (1-pi))
-
-
-
-				pair<double, double> Ri = ld.get_R(d[i].pos, d[j].pos); //this is D/Var( V_i )
-				pair<double, double> Rj = ld.get_R(d[j].pos, d[i].pos); //this is D/Var( V_j );
-
-
-
-
-				double BFj_ci, tmp2_4, BFi_cj, tmp2_42;
-				if (!params->rev){
-					//SNP i affects pheno 1, BF at SNP j for pheno 2 conditional on SNPi
-					BFj_ci = d[j].BF2_C(&d[i], params->cor, Rj, VarR_j);
-					tmp2_4 = snppri.at(i).at(0)+snppri.at(j).at(1)+d[i].BF1+BFj_ci;
-					//if (BFj_ci > d[j].calc_logBF2(params->cor)+3){
-					//	cout << d[j].id << " "<< d[i].id << " "<< Rj.first << " "<< BFj_ci << " "<< d[j].calc_logBF2(params->cor) << "\n";
-					//}
-					//SNP j affects pheno 1, BF at SNP i for pheno 2 conditional on SNPj
-					BFi_cj = d[i].BF2_C(&d[j],params->cor, Ri, VarR_i);
-					tmp2_42 = snppri.at(i).at(1)+snppri.at(j).at(0)+d[j].BF1+ BFi_cj;
-				}
-				else{
-					BFj_ci = d[j].BF1_C(&d[i], params->cor, Rj, VarR_j);
-					tmp2_4 = snppri.at(i).at(0)+snppri.at(j).at(1)+d[i].BF2+BFj_ci;
-
-					BFi_cj = d[i].BF1_C(&d[j],params->cor, Ri, VarR_i);
-					tmp2_42 = snppri.at(i).at(1)+snppri.at(j).at(0)+d[j].BF2+ BFi_cj;
-				}
-
-
 				tmp2add4 = sumlog(tmp2add4, tmp2_4);
 
 				tmp2add4 = sumlog(tmp2add4, tmp2_42);
@@ -1382,22 +1317,22 @@ double SNPs_PW::llk(int which){
 	seg_toadd.push_back(toadd);
 
 
-	//cout << m1 << " "<< m2 << " "<< m3 << " "<< m4<< "\n";
 	m1 = m1+log(pi[1]);
 	m2 = m2+log(pi[2]);
 	m3 = m3+log(pi[3]);
-	m4 = m4+log(pi[4]);
+	m4 = m4+log(pi[1] * pi[2]);
 
 	if (params->finemap){
 		double tmp = 1+ exp(m1-m3)+exp(m2-m3)+exp(m4-m3);
-		cout << alpha[4] << " "<< pi[4] << " "<< m1 << " "<< m2 << " "<< m3 << " "<< m4 << " " << toreturn << " "<< which << "\n";
 		toreturn = m3+log(tmp);
 		return toreturn;
 	}
-	double m0 = log(pi[0]);
+	// logLK ~ log(P(M0)+ P(M1)*LK(M1)/LK(M0)  + P(M2)*LK(M2)/LK(M0) + P(M3)*LK(M3)/LK(M0)+ P(M4)*LK(M4)/LK(M0))
+    double try_this = log(pi[0] + exp(m1) + exp(m2) + exp(m3) + exp(m4)); 
+    double m0 = log(pi[0]);
+
 	double tmp = 1+exp(m0-m3)+ exp(m1-m3)+exp(m2-m3)+exp(m4-m3);
 	toreturn = m3+log(tmp);
-	cout << alpha[4] << " "<< pi[4] << " "<< m0 << " "<< m1 << " "<< m2 << " "<< m3 << " "<< m4 << " " << toreturn << " "<< which << "\n";
 	return toreturn;
 }
 
@@ -1637,7 +1572,7 @@ void SNPs_PW::GSL_optim(){
     gsl_vector *x;
     gsl_vector *ss;
     gsl_multimin_function lm;
-    lm.n = nparam;
+    lm.n = nparam ;
     lm.f = &GSL_llk;
     struct GSL_params p;
     p.d = this;
@@ -1646,8 +1581,11 @@ void SNPs_PW::GSL_optim(){
     // initialize parameters
     //
     x = gsl_vector_alloc (nparam);
-    for (int i = 0; i < nparam; i++)   gsl_vector_set(x, i, alpha[i+1]);
-
+    for (int i = 0; i < (nparam -1) ; i++)  {
+        cout << i << endl;
+        gsl_vector_set(x, i, alpha[i+1]);
+    }
+    cout << nparam << " ? " << alpha.size() << endl;
     // set initial step sizes to 1
     ss = gsl_vector_alloc(nparam);
     gsl_vector_set_all(ss, 1.0);
@@ -1667,7 +1605,7 @@ void SNPs_PW::GSL_optim(){
              status = gsl_multimin_test_size (size, 0.001);
              //cout << iter << " "<< iter %10 << "\n";
              if (iter % 20 < 1 || iter < 20){
-            	 cout <<"iteration: "<< iter << " "<< alpha[0]<< " "<< alpha[1]<< " "<< alpha[2]<< " "<< alpha[3]<< " "<< alpha[4];
+            	 cout <<"iteration: "<< iter << " "<< alpha[0]<< " "<< alpha[1]<< " "<< alpha[2]<< " "<< alpha[3]<< " "; 
             	 cout << " "<< s->fval << " "<< size <<  "\n";
              }
 
@@ -2283,11 +2221,13 @@ double GSL_llk(const gsl_vector *x, void *params ){
 	//first set times
 	int na = ((struct GSL_params *) params)->d->alpha.size()-1;
 
+    cout << " So we must not get here " << na << endl;
 	for (int i = 0; i < na; i++){
 		((struct GSL_params *) params)->d->alpha[i+1] = gsl_vector_get(x, i);
 	}
 
 	((struct GSL_params *) params)->d->set_priors();
+    cout << " So we must not get here " << endl;
 	return -((struct GSL_params *) params)->d->llk();
 }
 
